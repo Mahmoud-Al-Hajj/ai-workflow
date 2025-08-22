@@ -1,0 +1,138 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "136bef94-543e-4052-bdfc-ab97c7af73d9",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "messages": {
+          "values": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        208,
+        0
+      ],
+      "id": "49039115-0813-4f0e-8c53-db0095fda82e",
+      "name": "Message a model"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        304,
+        208
+      ],
+      "id": "12c5236a-1c4e-478e-9816-bd283e1772d9",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "3deb1c0c-232a-44be-a1cd-bba311d4a2d4",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        832,
+        0
+      ],
+      "id": "26c91754-d5a5-4c6a-82ba-1b964175f712",
+      "name": "Merge"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "Message a model",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "",
+  "meta": {
+    "instanceId": "7ec77c784a6cb0f520f3a42da7a363d0b047f16ec0d86df5c86fdab9a7069e6f"
+  },
+  "tags": []
+}

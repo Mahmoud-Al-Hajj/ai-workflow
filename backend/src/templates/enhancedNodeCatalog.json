@@ -1,0 +1,2018 @@
+{
+  "actionnetwork": {
+    "action": "n8n-nodes-base.actionnetwork",
+    "trigger": null,
+    "displayName": "ActionNetwork",
+    "description": "",
+    "group": []
+  },
+  "activecampaign": {
+    "action": "n8n-nodes-base.activecampaign",
+    "trigger": "n8n-nodes-base.activecampaigntrigger",
+    "displayName": "ActiveCampaign",
+    "description": "",
+    "group": []
+  },
+  "acuityscheduling": {
+    "action": null,
+    "trigger": "n8n-nodes-base.acuityschedulingtrigger",
+    "displayName": "AcuitySchedulingTrigger",
+    "description": "",
+    "group": []
+  },
+  "adalo": {
+    "action": "n8n-nodes-base.adalo",
+    "trigger": null,
+    "displayName": "Adalo",
+    "description": "",
+    "group": []
+  },
+  "affinity": {
+    "action": "n8n-nodes-base.affinity",
+    "trigger": "n8n-nodes-base.affinitytrigger",
+    "displayName": "Affinity",
+    "description": "",
+    "group": []
+  },
+  "agilecrm": {
+    "action": "n8n-nodes-base.agilecrm",
+    "trigger": null,
+    "displayName": "AgileCrm",
+    "description": "",
+    "group": []
+  },
+  "airtable": {
+    "action": "n8n-nodes-base.airtable",
+    "trigger": "n8n-nodes-base.airtabletrigger",
+    "displayName": "Airtable",
+    "description": "",
+    "group": []
+  },
+  "amqp": {
+    "action": "n8n-nodes-base.amqp",
+    "trigger": "n8n-nodes-base.amqptrigger",
+    "displayName": "Amqp",
+    "description": "",
+    "group": []
+  },
+  "apitemplateio": {
+    "action": "n8n-nodes-base.apitemplateio",
+    "trigger": null,
+    "displayName": "ApiTemplateIo",
+    "description": "",
+    "group": []
+  },
+  "asana": {
+    "action": "n8n-nodes-base.asana",
+    "trigger": "n8n-nodes-base.asanatrigger",
+    "displayName": "Asana",
+    "description": "",
+    "group": []
+  },
+  "automizy": {
+    "action": "n8n-nodes-base.automizy",
+    "trigger": null,
+    "displayName": "Automizy",
+    "description": "",
+    "group": []
+  },
+  "autopilot": {
+    "action": "n8n-nodes-base.autopilot",
+    "trigger": "n8n-nodes-base.autopilottrigger",
+    "displayName": "Autopilot",
+    "description": "",
+    "group": []
+  },
+  "awslambda": {
+    "action": "n8n-nodes-base.awslambda",
+    "trigger": null,
+    "displayName": "AwsLambda",
+    "description": "",
+    "group": []
+  },
+  "awssns": {
+    "action": "n8n-nodes-base.awssns",
+    "trigger": "n8n-nodes-base.awssnstrigger",
+    "displayName": "AwsSns",
+    "description": "",
+    "group": []
+  },
+  "bamboohr": {
+    "action": "n8n-nodes-base.bamboohr",
+    "trigger": null,
+    "displayName": "BambooHr",
+    "description": "",
+    "group": []
+  },
+  "bannerbear": {
+    "action": "n8n-nodes-base.bannerbear",
+    "trigger": null,
+    "displayName": "Bannerbear",
+    "description": "",
+    "group": []
+  },
+  "baserow": {
+    "action": "n8n-nodes-base.baserow",
+    "trigger": null,
+    "displayName": "Baserow",
+    "description": "",
+    "group": []
+  },
+  "beeminder": {
+    "action": "n8n-nodes-base.beeminder",
+    "trigger": null,
+    "displayName": "Beeminder",
+    "description": "",
+    "group": []
+  },
+  "bitbucket": {
+    "action": null,
+    "trigger": "n8n-nodes-base.bitbuckettrigger",
+    "displayName": "BitbucketTrigger",
+    "description": "",
+    "group": []
+  },
+  "bitly": {
+    "action": "n8n-nodes-base.bitly",
+    "trigger": null,
+    "displayName": "Bitly",
+    "description": "",
+    "group": []
+  },
+  "bitwarden": {
+    "action": "n8n-nodes-base.bitwarden",
+    "trigger": null,
+    "displayName": "Bitwarden",
+    "description": "",
+    "group": []
+  },
+  "box": {
+    "action": "n8n-nodes-base.box",
+    "trigger": "n8n-nodes-base.boxtrigger",
+    "displayName": "Box",
+    "description": "",
+    "group": []
+  },
+  "brandfetch": {
+    "action": "n8n-nodes-base.brandfetch",
+    "trigger": null,
+    "displayName": "Brandfetch",
+    "description": "",
+    "group": []
+  },
+  "brevo": {
+    "action": "n8n-nodes-base.brevo",
+    "trigger": "n8n-nodes-base.brevotrigger",
+    "displayName": "Brevo",
+    "description": "",
+    "group": []
+  },
+  "bubble": {
+    "action": "n8n-nodes-base.bubble",
+    "trigger": null,
+    "displayName": "Bubble",
+    "description": "",
+    "group": []
+  },
+  "cal": {
+    "action": null,
+    "trigger": "n8n-nodes-base.caltrigger",
+    "displayName": "CalTrigger",
+    "description": "",
+    "group": []
+  },
+  "calendly": {
+    "action": null,
+    "trigger": "n8n-nodes-base.calendlytrigger",
+    "displayName": "CalendlyTrigger",
+    "description": "",
+    "group": []
+  },
+  "chargebee": {
+    "action": "n8n-nodes-base.chargebee",
+    "trigger": "n8n-nodes-base.chargebeetrigger",
+    "displayName": "Chargebee",
+    "description": "",
+    "group": []
+  },
+  "circleci": {
+    "action": "n8n-nodes-base.circleci",
+    "trigger": null,
+    "displayName": "CircleCi",
+    "description": "",
+    "group": []
+  },
+  "clearbit": {
+    "action": "n8n-nodes-base.clearbit",
+    "trigger": null,
+    "displayName": "Clearbit",
+    "description": "",
+    "group": []
+  },
+  "clickup": {
+    "action": "n8n-nodes-base.clickup",
+    "trigger": "n8n-nodes-base.clickuptrigger",
+    "displayName": "ClickUp",
+    "description": "",
+    "group": []
+  },
+  "clockify": {
+    "action": "n8n-nodes-base.clockify",
+    "trigger": "n8n-nodes-base.clockifytrigger",
+    "displayName": "Clockify",
+    "description": "",
+    "group": []
+  },
+  "cloudflare": {
+    "action": "n8n-nodes-base.cloudflare",
+    "trigger": null,
+    "displayName": "Cloudflare",
+    "description": "",
+    "group": []
+  },
+  "cockpit": {
+    "action": "n8n-nodes-base.cockpit",
+    "trigger": null,
+    "displayName": "Cockpit",
+    "description": "",
+    "group": []
+  },
+  "coda": {
+    "action": "n8n-nodes-base.coda",
+    "trigger": null,
+    "displayName": "Coda",
+    "description": "",
+    "group": []
+  },
+  "code": {
+    "action": "n8n-nodes-base.code",
+    "trigger": null,
+    "displayName": "Code",
+    "description": "",
+    "group": []
+  },
+  "coingecko": {
+    "action": "n8n-nodes-base.coingecko",
+    "trigger": null,
+    "displayName": "CoinGecko",
+    "description": "",
+    "group": []
+  },
+  "comparedatasets": {
+    "action": "n8n-nodes-base.comparedatasets",
+    "trigger": null,
+    "displayName": "CompareDatasets",
+    "description": "",
+    "group": []
+  },
+  "compression": {
+    "action": "n8n-nodes-base.compression",
+    "trigger": null,
+    "displayName": "Compression",
+    "description": "",
+    "group": []
+  },
+  "contentful": {
+    "action": "n8n-nodes-base.contentful",
+    "trigger": null,
+    "displayName": "Contentful",
+    "description": "",
+    "group": []
+  },
+  "convertkit": {
+    "action": "n8n-nodes-base.convertkit",
+    "trigger": "n8n-nodes-base.convertkittrigger",
+    "displayName": "ConvertKit",
+    "description": "",
+    "group": []
+  },
+  "copper": {
+    "action": "n8n-nodes-base.copper",
+    "trigger": "n8n-nodes-base.coppertrigger",
+    "displayName": "Copper",
+    "description": "",
+    "group": []
+  },
+  "cortex": {
+    "action": "n8n-nodes-base.cortex",
+    "trigger": null,
+    "displayName": "Cortex",
+    "description": "",
+    "group": []
+  },
+  "cratedb": {
+    "action": "n8n-nodes-base.cratedb",
+    "trigger": null,
+    "displayName": "CrateDb",
+    "description": "",
+    "group": []
+  },
+  "cron": {
+    "action": "n8n-nodes-base.cron",
+    "trigger": null,
+    "displayName": "Cron",
+    "description": "",
+    "group": []
+  },
+  "crowddev": {
+    "action": "n8n-nodes-base.crowddev",
+    "trigger": "n8n-nodes-base.crowddevtrigger",
+    "displayName": "CrowdDev",
+    "description": "",
+    "group": []
+  },
+  "crypto": {
+    "action": "n8n-nodes-base.crypto",
+    "trigger": null,
+    "displayName": "Crypto",
+    "description": "",
+    "group": []
+  },
+  "customerio": {
+    "action": "n8n-nodes-base.customerio",
+    "trigger": "n8n-nodes-base.customeriotrigger",
+    "displayName": "CustomerIo",
+    "description": "",
+    "group": []
+  },
+  "datetime": {
+    "action": "n8n-nodes-base.datetime",
+    "trigger": null,
+    "displayName": "DateTime",
+    "description": "",
+    "group": []
+  },
+  "debughelper": {
+    "action": "n8n-nodes-base.debughelper",
+    "trigger": null,
+    "displayName": "DebugHelper",
+    "description": "",
+    "group": []
+  },
+  "deepl": {
+    "action": "n8n-nodes-base.deepl",
+    "trigger": null,
+    "displayName": "DeepL",
+    "description": "",
+    "group": []
+  },
+  "demio": {
+    "action": "n8n-nodes-base.demio",
+    "trigger": null,
+    "displayName": "Demio",
+    "description": "",
+    "group": []
+  },
+  "dhl": {
+    "action": "n8n-nodes-base.dhl",
+    "trigger": null,
+    "displayName": "Dhl",
+    "description": "",
+    "group": []
+  },
+  "discord": {
+    "action": "n8n-nodes-base.discord",
+    "trigger": null,
+    "displayName": "Discord",
+    "description": "",
+    "group": []
+  },
+  "discourse": {
+    "action": "n8n-nodes-base.discourse",
+    "trigger": null,
+    "displayName": "Discourse",
+    "description": "",
+    "group": []
+  },
+  "disqus": {
+    "action": "n8n-nodes-base.disqus",
+    "trigger": null,
+    "displayName": "Disqus",
+    "description": "",
+    "group": []
+  },
+  "drift": {
+    "action": "n8n-nodes-base.drift",
+    "trigger": null,
+    "displayName": "Drift",
+    "description": "",
+    "group": []
+  },
+  "dropbox": {
+    "action": "n8n-nodes-base.dropbox",
+    "trigger": null,
+    "displayName": "Dropbox",
+    "description": "",
+    "group": []
+  },
+  "dropcontact": {
+    "action": "n8n-nodes-base.dropcontact",
+    "trigger": null,
+    "displayName": "Dropcontact",
+    "description": "",
+    "group": []
+  },
+  "e2etest": {
+    "action": "n8n-nodes-base.e2etest",
+    "trigger": null,
+    "displayName": "E2eTest",
+    "description": "",
+    "group": []
+  },
+  "editimage": {
+    "action": "n8n-nodes-base.editimage",
+    "trigger": null,
+    "displayName": "EditImage",
+    "description": "",
+    "group": []
+  },
+  "egoi": {
+    "action": "n8n-nodes-base.egoi",
+    "trigger": null,
+    "displayName": "Egoi",
+    "description": "",
+    "group": []
+  },
+  "emailreadimap": {
+    "action": "n8n-nodes-base.emailreadimap",
+    "trigger": null,
+    "displayName": "EmailReadImap",
+    "description": "",
+    "group": []
+  },
+  "emailsend": {
+    "action": "n8n-nodes-base.emailsend",
+    "trigger": null,
+    "displayName": "EmailSend",
+    "description": "",
+    "group": []
+  },
+  "emelia": {
+    "action": "n8n-nodes-base.emelia",
+    "trigger": "n8n-nodes-base.emeliatrigger",
+    "displayName": "Emelia",
+    "description": "",
+    "group": []
+  },
+  "erpnext": {
+    "action": "n8n-nodes-base.erpnext",
+    "trigger": null,
+    "displayName": "ERPNext",
+    "description": "",
+    "group": []
+  },
+  "error": {
+    "action": null,
+    "trigger": "n8n-nodes-base.errortrigger",
+    "displayName": "ErrorTrigger",
+    "description": "",
+    "group": []
+  },
+  "eventbrite": {
+    "action": null,
+    "trigger": "n8n-nodes-base.eventbritetrigger",
+    "displayName": "EventbriteTrigger",
+    "description": "",
+    "group": []
+  },
+  "executecommand": {
+    "action": "n8n-nodes-base.executecommand",
+    "trigger": null,
+    "displayName": "ExecuteCommand",
+    "description": "",
+    "group": []
+  },
+  "executeworkflow": {
+    "action": "n8n-nodes-base.executeworkflow",
+    "trigger": "n8n-nodes-base.executeworkflowtrigger",
+    "displayName": "ExecuteWorkflow",
+    "description": "",
+    "group": []
+  },
+  "executiondata": {
+    "action": "n8n-nodes-base.executiondata",
+    "trigger": null,
+    "displayName": "ExecutionData",
+    "description": "",
+    "group": []
+  },
+  "facebookgraphapi": {
+    "action": "n8n-nodes-base.facebookgraphapi",
+    "trigger": null,
+    "displayName": "FacebookGraphApi",
+    "description": "",
+    "group": []
+  },
+  "facebook": {
+    "action": null,
+    "trigger": "n8n-nodes-base.facebooktrigger",
+    "displayName": "FacebookTrigger",
+    "description": "",
+    "group": []
+  },
+  "facebookleadads": {
+    "action": null,
+    "trigger": "n8n-nodes-base.facebookleadadstrigger",
+    "displayName": "FacebookLeadAdsTrigger",
+    "description": "",
+    "group": []
+  },
+  "figma": {
+    "action": null,
+    "trigger": "n8n-nodes-base.figmatrigger",
+    "displayName": "FigmaTrigger",
+    "description": "",
+    "group": []
+  },
+  "filemaker": {
+    "action": "n8n-nodes-base.filemaker",
+    "trigger": null,
+    "displayName": "FileMaker",
+    "description": "",
+    "group": []
+  },
+  "filter": {
+    "action": "n8n-nodes-base.filter",
+    "trigger": null,
+    "displayName": "Filter",
+    "description": "",
+    "group": []
+  },
+  "flow": {
+    "action": "n8n-nodes-base.flow",
+    "trigger": "n8n-nodes-base.flowtrigger",
+    "displayName": "Flow",
+    "description": "",
+    "group": []
+  },
+  "form": {
+    "action": null,
+    "trigger": "n8n-nodes-base.formtrigger",
+    "displayName": "FormTrigger",
+    "description": "",
+    "group": []
+  },
+  "formio": {
+    "action": null,
+    "trigger": "n8n-nodes-base.formiotrigger",
+    "displayName": "FormIoTrigger",
+    "description": "",
+    "group": []
+  },
+  "formstack": {
+    "action": null,
+    "trigger": "n8n-nodes-base.formstacktrigger",
+    "displayName": "FormstackTrigger",
+    "description": "",
+    "group": []
+  },
+  "freshdesk": {
+    "action": "n8n-nodes-base.freshdesk",
+    "trigger": null,
+    "displayName": "Freshdesk",
+    "description": "",
+    "group": []
+  },
+  "freshservice": {
+    "action": "n8n-nodes-base.freshservice",
+    "trigger": null,
+    "displayName": "Freshservice",
+    "description": "",
+    "group": []
+  },
+  "freshworkscrm": {
+    "action": "n8n-nodes-base.freshworkscrm",
+    "trigger": null,
+    "displayName": "FreshworksCrm",
+    "description": "",
+    "group": []
+  },
+  "ftp": {
+    "action": "n8n-nodes-base.ftp",
+    "trigger": null,
+    "displayName": "Ftp",
+    "description": "",
+    "group": []
+  },
+  "function": {
+    "action": "n8n-nodes-base.function",
+    "trigger": null,
+    "displayName": "Function",
+    "description": "",
+    "group": []
+  },
+  "functionitem": {
+    "action": "n8n-nodes-base.functionitem",
+    "trigger": null,
+    "displayName": "FunctionItem",
+    "description": "",
+    "group": []
+  },
+  "getresponse": {
+    "action": "n8n-nodes-base.getresponse",
+    "trigger": "n8n-nodes-base.getresponsetrigger",
+    "displayName": "GetResponse",
+    "description": "",
+    "group": []
+  },
+  "ghost": {
+    "action": "n8n-nodes-base.ghost",
+    "trigger": null,
+    "displayName": "Ghost",
+    "description": "",
+    "group": []
+  },
+  "git": {
+    "action": "n8n-nodes-base.git",
+    "trigger": null,
+    "displayName": "Git",
+    "description": "",
+    "group": []
+  },
+  "github": {
+    "action": "n8n-nodes-base.github",
+    "trigger": "n8n-nodes-base.githubtrigger",
+    "displayName": "Github",
+    "description": "",
+    "group": []
+  },
+  "gitlab": {
+    "action": "n8n-nodes-base.gitlab",
+    "trigger": "n8n-nodes-base.gitlabtrigger",
+    "displayName": "Gitlab",
+    "description": "",
+    "group": []
+  },
+  "gotify": {
+    "action": "n8n-nodes-base.gotify",
+    "trigger": null,
+    "displayName": "Gotify",
+    "description": "",
+    "group": []
+  },
+  "gotowebinar": {
+    "action": "n8n-nodes-base.gotowebinar",
+    "trigger": null,
+    "displayName": "GoToWebinar",
+    "description": "",
+    "group": []
+  },
+  "grafana": {
+    "action": "n8n-nodes-base.grafana",
+    "trigger": null,
+    "displayName": "Grafana",
+    "description": "",
+    "group": []
+  },
+  "graphql": {
+    "action": "n8n-nodes-base.graphql",
+    "trigger": null,
+    "displayName": "GraphQL",
+    "description": "",
+    "group": []
+  },
+  "grist": {
+    "action": "n8n-nodes-base.grist",
+    "trigger": null,
+    "displayName": "Grist",
+    "description": "",
+    "group": []
+  },
+  "gumroad": {
+    "action": null,
+    "trigger": "n8n-nodes-base.gumroadtrigger",
+    "displayName": "GumroadTrigger",
+    "description": "",
+    "group": []
+  },
+  "hackernews": {
+    "action": "n8n-nodes-base.hackernews",
+    "trigger": null,
+    "displayName": "HackerNews",
+    "description": "",
+    "group": []
+  },
+  "halopsa": {
+    "action": "n8n-nodes-base.halopsa",
+    "trigger": null,
+    "displayName": "HaloPSA",
+    "description": "",
+    "group": []
+  },
+  "harvest": {
+    "action": "n8n-nodes-base.harvest",
+    "trigger": null,
+    "displayName": "Harvest",
+    "description": "",
+    "group": []
+  },
+  "helpscout": {
+    "action": "n8n-nodes-base.helpscout",
+    "trigger": "n8n-nodes-base.helpscouttrigger",
+    "displayName": "HelpScout",
+    "description": "",
+    "group": []
+  },
+  "highlevel": {
+    "action": "n8n-nodes-base.highlevel",
+    "trigger": null,
+    "displayName": "HighLevel",
+    "description": "",
+    "group": []
+  },
+  "homeassistant": {
+    "action": "n8n-nodes-base.homeassistant",
+    "trigger": null,
+    "displayName": "HomeAssistant",
+    "description": "",
+    "group": []
+  },
+  "html": {
+    "action": "n8n-nodes-base.html",
+    "trigger": null,
+    "displayName": "Html",
+    "description": "",
+    "group": []
+  },
+  "htmlextract": {
+    "action": "n8n-nodes-base.htmlextract",
+    "trigger": null,
+    "displayName": "HtmlExtract",
+    "description": "",
+    "group": []
+  },
+  "httprequest": {
+    "action": "n8n-nodes-base.httprequest",
+    "trigger": null,
+    "displayName": "HttpRequest",
+    "description": "",
+    "group": []
+  },
+  "hubspot": {
+    "action": "n8n-nodes-base.hubspot",
+    "trigger": "n8n-nodes-base.hubspottrigger",
+    "displayName": "Hubspot",
+    "description": "",
+    "group": []
+  },
+  "humanticai": {
+    "action": "n8n-nodes-base.humanticai",
+    "trigger": null,
+    "displayName": "HumanticAi",
+    "description": "",
+    "group": []
+  },
+  "hunter": {
+    "action": "n8n-nodes-base.hunter",
+    "trigger": null,
+    "displayName": "Hunter",
+    "description": "",
+    "group": []
+  },
+  "icalendar": {
+    "action": "n8n-nodes-base.icalendar",
+    "trigger": null,
+    "displayName": "ICalendar",
+    "description": "",
+    "group": []
+  },
+  "if": {
+    "action": "n8n-nodes-base.if",
+    "trigger": null,
+    "displayName": "If",
+    "description": "",
+    "group": []
+  },
+  "intercom": {
+    "action": "n8n-nodes-base.intercom",
+    "trigger": null,
+    "displayName": "Intercom",
+    "description": "",
+    "group": []
+  },
+  "interval": {
+    "action": "n8n-nodes-base.interval",
+    "trigger": null,
+    "displayName": "Interval",
+    "description": "",
+    "group": []
+  },
+  "invoiceninja": {
+    "action": "n8n-nodes-base.invoiceninja",
+    "trigger": "n8n-nodes-base.invoiceninjatrigger",
+    "displayName": "InvoiceNinja",
+    "description": "",
+    "group": []
+  },
+  "itemlists": {
+    "action": "n8n-nodes-base.itemlists",
+    "trigger": null,
+    "displayName": "ItemLists",
+    "description": "",
+    "group": []
+  },
+  "iterable": {
+    "action": "n8n-nodes-base.iterable",
+    "trigger": null,
+    "displayName": "Iterable",
+    "description": "",
+    "group": []
+  },
+  "jenkins": {
+    "action": "n8n-nodes-base.jenkins",
+    "trigger": null,
+    "displayName": "Jenkins",
+    "description": "",
+    "group": []
+  },
+  "jira": {
+    "action": "n8n-nodes-base.jira",
+    "trigger": "n8n-nodes-base.jiratrigger",
+    "displayName": "Jira",
+    "description": "",
+    "group": []
+  },
+  "jotform": {
+    "action": null,
+    "trigger": "n8n-nodes-base.jotformtrigger",
+    "displayName": "JotFormTrigger",
+    "description": "",
+    "group": []
+  },
+  "kafka": {
+    "action": "n8n-nodes-base.kafka",
+    "trigger": "n8n-nodes-base.kafkatrigger",
+    "displayName": "Kafka",
+    "description": "",
+    "group": []
+  },
+  "keap": {
+    "action": "n8n-nodes-base.keap",
+    "trigger": "n8n-nodes-base.keaptrigger",
+    "displayName": "Keap",
+    "description": "",
+    "group": []
+  },
+  "kitemaker": {
+    "action": "n8n-nodes-base.kitemaker",
+    "trigger": null,
+    "displayName": "Kitemaker",
+    "description": "",
+    "group": []
+  },
+  "kobotoolbox": {
+    "action": "n8n-nodes-base.kobotoolbox",
+    "trigger": "n8n-nodes-base.kobotoolboxtrigger",
+    "displayName": "KoBoToolbox",
+    "description": "",
+    "group": []
+  },
+  "ldap": {
+    "action": "n8n-nodes-base.ldap",
+    "trigger": null,
+    "displayName": "Ldap",
+    "description": "",
+    "group": []
+  },
+  "lemlist": {
+    "action": "n8n-nodes-base.lemlist",
+    "trigger": "n8n-nodes-base.lemlisttrigger",
+    "displayName": "Lemlist",
+    "description": "",
+    "group": []
+  },
+  "line": {
+    "action": "n8n-nodes-base.line",
+    "trigger": null,
+    "displayName": "Line",
+    "description": "",
+    "group": []
+  },
+  "linear": {
+    "action": "n8n-nodes-base.linear",
+    "trigger": "n8n-nodes-base.lineartrigger",
+    "displayName": "Linear",
+    "description": "",
+    "group": []
+  },
+  "lingvanex": {
+    "action": "n8n-nodes-base.lingvanex",
+    "trigger": null,
+    "displayName": "LingvaNex",
+    "description": "",
+    "group": []
+  },
+  "linkedin": {
+    "action": "n8n-nodes-base.linkedin",
+    "trigger": null,
+    "displayName": "LinkedIn",
+    "description": "",
+    "group": []
+  },
+  "localfile": {
+    "action": null,
+    "trigger": "n8n-nodes-base.localfiletrigger",
+    "displayName": "LocalFileTrigger",
+    "description": "",
+    "group": []
+  },
+  "lonescale": {
+    "action": "n8n-nodes-base.lonescale",
+    "trigger": "n8n-nodes-base.lonescaletrigger",
+    "displayName": "LoneScale",
+    "description": "",
+    "group": []
+  },
+  "magento2": {
+    "action": "n8n-nodes-base.magento2",
+    "trigger": null,
+    "displayName": "Magento2",
+    "description": "",
+    "group": []
+  },
+  "mailcheck": {
+    "action": "n8n-nodes-base.mailcheck",
+    "trigger": null,
+    "displayName": "Mailcheck",
+    "description": "",
+    "group": []
+  },
+  "mailchimp": {
+    "action": "n8n-nodes-base.mailchimp",
+    "trigger": "n8n-nodes-base.mailchimptrigger",
+    "displayName": "Mailchimp",
+    "description": "",
+    "group": []
+  },
+  "mailerlite": {
+    "action": "n8n-nodes-base.mailerlite",
+    "trigger": "n8n-nodes-base.mailerlitetrigger",
+    "displayName": "MailerLite",
+    "description": "",
+    "group": []
+  },
+  "mailgun": {
+    "action": "n8n-nodes-base.mailgun",
+    "trigger": null,
+    "displayName": "Mailgun",
+    "description": "",
+    "group": []
+  },
+  "mailjet": {
+    "action": "n8n-nodes-base.mailjet",
+    "trigger": "n8n-nodes-base.mailjettrigger",
+    "displayName": "Mailjet",
+    "description": "",
+    "group": []
+  },
+  "mandrill": {
+    "action": "n8n-nodes-base.mandrill",
+    "trigger": null,
+    "displayName": "Mandrill",
+    "description": "",
+    "group": []
+  },
+  "manual": {
+    "action": null,
+    "trigger": "n8n-nodes-base.manualtrigger",
+    "displayName": "ManualTrigger",
+    "description": "",
+    "group": []
+  },
+  "markdown": {
+    "action": "n8n-nodes-base.markdown",
+    "trigger": null,
+    "displayName": "Markdown",
+    "description": "",
+    "group": []
+  },
+  "marketstack": {
+    "action": "n8n-nodes-base.marketstack",
+    "trigger": null,
+    "displayName": "Marketstack",
+    "description": "",
+    "group": []
+  },
+  "matrix": {
+    "action": "n8n-nodes-base.matrix",
+    "trigger": null,
+    "displayName": "Matrix",
+    "description": "",
+    "group": []
+  },
+  "mattermost": {
+    "action": "n8n-nodes-base.mattermost",
+    "trigger": null,
+    "displayName": "Mattermost",
+    "description": "",
+    "group": []
+  },
+  "mautic": {
+    "action": "n8n-nodes-base.mautic",
+    "trigger": "n8n-nodes-base.mautictrigger",
+    "displayName": "Mautic",
+    "description": "",
+    "group": []
+  },
+  "medium": {
+    "action": "n8n-nodes-base.medium",
+    "trigger": null,
+    "displayName": "Medium",
+    "description": "",
+    "group": []
+  },
+  "merge": {
+    "action": "n8n-nodes-base.merge",
+    "trigger": null,
+    "displayName": "Merge",
+    "description": "",
+    "group": []
+  },
+  "messagebird": {
+    "action": "n8n-nodes-base.messagebird",
+    "trigger": null,
+    "displayName": "MessageBird",
+    "description": "",
+    "group": []
+  },
+  "metabase": {
+    "action": "n8n-nodes-base.metabase",
+    "trigger": null,
+    "displayName": "Metabase",
+    "description": "",
+    "group": []
+  },
+  "mindee": {
+    "action": "n8n-nodes-base.mindee",
+    "trigger": null,
+    "displayName": "Mindee",
+    "description": "",
+    "group": []
+  },
+  "misp": {
+    "action": "n8n-nodes-base.misp",
+    "trigger": null,
+    "displayName": "Misp",
+    "description": "",
+    "group": []
+  },
+  "mocean": {
+    "action": "n8n-nodes-base.mocean",
+    "trigger": null,
+    "displayName": "Mocean",
+    "description": "",
+    "group": []
+  },
+  "mondaycom": {
+    "action": "n8n-nodes-base.mondaycom",
+    "trigger": null,
+    "displayName": "MondayCom",
+    "description": "",
+    "group": []
+  },
+  "mongodb": {
+    "action": "n8n-nodes-base.mongodb",
+    "trigger": null,
+    "displayName": "MongoDb",
+    "description": "",
+    "group": []
+  },
+  "monicacrm": {
+    "action": "n8n-nodes-base.monicacrm",
+    "trigger": null,
+    "displayName": "MonicaCrm",
+    "description": "",
+    "group": []
+  },
+  "movebinarydata": {
+    "action": "n8n-nodes-base.movebinarydata",
+    "trigger": null,
+    "displayName": "MoveBinaryData",
+    "description": "",
+    "group": []
+  },
+  "mqtt": {
+    "action": "n8n-nodes-base.mqtt",
+    "trigger": "n8n-nodes-base.mqtttrigger",
+    "displayName": "Mqtt",
+    "description": "",
+    "group": []
+  },
+  "msg91": {
+    "action": "n8n-nodes-base.msg91",
+    "trigger": null,
+    "displayName": "Msg91",
+    "description": "",
+    "group": []
+  },
+  "mysql": {
+    "action": "n8n-nodes-base.mysql",
+    "trigger": null,
+    "displayName": "MySql",
+    "description": "",
+    "group": []
+  },
+  "n8n": {
+    "action": "n8n-nodes-base.n8n",
+    "trigger": "n8n-nodes-base.n8ntrigger",
+    "displayName": "N8n",
+    "description": "",
+    "group": []
+  },
+  "n8ntrainingcustomerdatastore": {
+    "action": "n8n-nodes-base.n8ntrainingcustomerdatastore",
+    "trigger": null,
+    "displayName": "N8nTrainingCustomerDatastore",
+    "description": "",
+    "group": []
+  },
+  "n8ntrainingcustomermessenger": {
+    "action": "n8n-nodes-base.n8ntrainingcustomermessenger",
+    "trigger": null,
+    "displayName": "N8nTrainingCustomerMessenger",
+    "description": "",
+    "group": []
+  },
+  "nasa": {
+    "action": "n8n-nodes-base.nasa",
+    "trigger": null,
+    "displayName": "Nasa",
+    "description": "",
+    "group": []
+  },
+  "netlify": {
+    "action": "n8n-nodes-base.netlify",
+    "trigger": "n8n-nodes-base.netlifytrigger",
+    "displayName": "Netlify",
+    "description": "",
+    "group": []
+  },
+  "nextcloud": {
+    "action": "n8n-nodes-base.nextcloud",
+    "trigger": null,
+    "displayName": "NextCloud",
+    "description": "",
+    "group": []
+  },
+  "nocodb": {
+    "action": "n8n-nodes-base.nocodb",
+    "trigger": null,
+    "displayName": "NocoDB",
+    "description": "",
+    "group": []
+  },
+  "noop": {
+    "action": "n8n-nodes-base.noop",
+    "trigger": null,
+    "displayName": "NoOp",
+    "description": "",
+    "group": []
+  },
+  "notion": {
+    "action": "n8n-nodes-base.notion",
+    "trigger": "n8n-nodes-base.notiontrigger",
+    "displayName": "Notion",
+    "description": "",
+    "group": []
+  },
+  "npm": {
+    "action": "n8n-nodes-base.npm",
+    "trigger": null,
+    "displayName": "Npm",
+    "description": "",
+    "group": []
+  },
+  "odoo": {
+    "action": "n8n-nodes-base.odoo",
+    "trigger": null,
+    "displayName": "Odoo",
+    "description": "",
+    "group": []
+  },
+  "onesimpleapi": {
+    "action": "n8n-nodes-base.onesimpleapi",
+    "trigger": null,
+    "displayName": "OneSimpleApi",
+    "description": "",
+    "group": []
+  },
+  "onfleet": {
+    "action": "n8n-nodes-base.onfleet",
+    "trigger": "n8n-nodes-base.onfleettrigger",
+    "displayName": "Onfleet",
+    "description": "",
+    "group": []
+  },
+  "openai": {
+    "action": "n8n-nodes-base.openai",
+    "trigger": null,
+    "displayName": "OpenAi",
+    "description": "",
+    "group": []
+  },
+  "openthesaurus": {
+    "action": "n8n-nodes-base.openthesaurus",
+    "trigger": null,
+    "displayName": "OpenThesaurus",
+    "description": "",
+    "group": []
+  },
+  "openweathermap": {
+    "action": "n8n-nodes-base.openweathermap",
+    "trigger": null,
+    "displayName": "OpenWeatherMap",
+    "description": "",
+    "group": []
+  },
+  "orbit": {
+    "action": "n8n-nodes-base.orbit",
+    "trigger": null,
+    "displayName": "Orbit",
+    "description": "",
+    "group": []
+  },
+  "oura": {
+    "action": "n8n-nodes-base.oura",
+    "trigger": null,
+    "displayName": "Oura",
+    "description": "",
+    "group": []
+  },
+  "paddle": {
+    "action": "n8n-nodes-base.paddle",
+    "trigger": null,
+    "displayName": "Paddle",
+    "description": "",
+    "group": []
+  },
+  "pagerduty": {
+    "action": "n8n-nodes-base.pagerduty",
+    "trigger": null,
+    "displayName": "PagerDuty",
+    "description": "",
+    "group": []
+  },
+  "paypal": {
+    "action": "n8n-nodes-base.paypal",
+    "trigger": "n8n-nodes-base.paypaltrigger",
+    "displayName": "PayPal",
+    "description": "",
+    "group": []
+  },
+  "peekalink": {
+    "action": "n8n-nodes-base.peekalink",
+    "trigger": null,
+    "displayName": "Peekalink",
+    "description": "",
+    "group": []
+  },
+  "phantombuster": {
+    "action": "n8n-nodes-base.phantombuster",
+    "trigger": null,
+    "displayName": "Phantombuster",
+    "description": "",
+    "group": []
+  },
+  "philipshue": {
+    "action": "n8n-nodes-base.philipshue",
+    "trigger": null,
+    "displayName": "PhilipsHue",
+    "description": "",
+    "group": []
+  },
+  "pipedrive": {
+    "action": "n8n-nodes-base.pipedrive",
+    "trigger": "n8n-nodes-base.pipedrivetrigger",
+    "displayName": "Pipedrive",
+    "description": "",
+    "group": []
+  },
+  "plivo": {
+    "action": "n8n-nodes-base.plivo",
+    "trigger": null,
+    "displayName": "Plivo",
+    "description": "",
+    "group": []
+  },
+  "postbin": {
+    "action": "n8n-nodes-base.postbin",
+    "trigger": null,
+    "displayName": "PostBin",
+    "description": "",
+    "group": []
+  },
+  "postgres": {
+    "action": "n8n-nodes-base.postgres",
+    "trigger": "n8n-nodes-base.postgrestrigger",
+    "displayName": "Postgres",
+    "description": "",
+    "group": []
+  },
+  "posthog": {
+    "action": "n8n-nodes-base.posthog",
+    "trigger": null,
+    "displayName": "PostHog",
+    "description": "",
+    "group": []
+  },
+  "postmark": {
+    "action": null,
+    "trigger": "n8n-nodes-base.postmarktrigger",
+    "displayName": "PostmarkTrigger",
+    "description": "",
+    "group": []
+  },
+  "profitwell": {
+    "action": "n8n-nodes-base.profitwell",
+    "trigger": null,
+    "displayName": "ProfitWell",
+    "description": "",
+    "group": []
+  },
+  "pushbullet": {
+    "action": "n8n-nodes-base.pushbullet",
+    "trigger": null,
+    "displayName": "Pushbullet",
+    "description": "",
+    "group": []
+  },
+  "pushcut": {
+    "action": "n8n-nodes-base.pushcut",
+    "trigger": "n8n-nodes-base.pushcuttrigger",
+    "displayName": "Pushcut",
+    "description": "",
+    "group": []
+  },
+  "pushover": {
+    "action": "n8n-nodes-base.pushover",
+    "trigger": null,
+    "displayName": "Pushover",
+    "description": "",
+    "group": []
+  },
+  "questdb": {
+    "action": "n8n-nodes-base.questdb",
+    "trigger": null,
+    "displayName": "QuestDb",
+    "description": "",
+    "group": []
+  },
+  "quickbase": {
+    "action": "n8n-nodes-base.quickbase",
+    "trigger": null,
+    "displayName": "QuickBase",
+    "description": "",
+    "group": []
+  },
+  "quickbooks": {
+    "action": "n8n-nodes-base.quickbooks",
+    "trigger": null,
+    "displayName": "QuickBooks",
+    "description": "",
+    "group": []
+  },
+  "quickchart": {
+    "action": "n8n-nodes-base.quickchart",
+    "trigger": null,
+    "displayName": "QuickChart",
+    "description": "",
+    "group": []
+  },
+  "rabbitmq": {
+    "action": "n8n-nodes-base.rabbitmq",
+    "trigger": "n8n-nodes-base.rabbitmqtrigger",
+    "displayName": "RabbitMQ",
+    "description": "",
+    "group": []
+  },
+  "raindrop": {
+    "action": "n8n-nodes-base.raindrop",
+    "trigger": null,
+    "displayName": "Raindrop",
+    "description": "",
+    "group": []
+  },
+  "readbinaryfile": {
+    "action": "n8n-nodes-base.readbinaryfile",
+    "trigger": null,
+    "displayName": "ReadBinaryFile",
+    "description": "",
+    "group": []
+  },
+  "readbinaryfiles": {
+    "action": "n8n-nodes-base.readbinaryfiles",
+    "trigger": null,
+    "displayName": "ReadBinaryFiles",
+    "description": "",
+    "group": []
+  },
+  "readpdf": {
+    "action": "n8n-nodes-base.readpdf",
+    "trigger": null,
+    "displayName": "ReadPDF",
+    "description": "",
+    "group": []
+  },
+  "reddit": {
+    "action": "n8n-nodes-base.reddit",
+    "trigger": null,
+    "displayName": "Reddit",
+    "description": "",
+    "group": []
+  },
+  "redis": {
+    "action": "n8n-nodes-base.redis",
+    "trigger": "n8n-nodes-base.redistrigger",
+    "displayName": "Redis",
+    "description": "",
+    "group": []
+  },
+  "renamekeys": {
+    "action": "n8n-nodes-base.renamekeys",
+    "trigger": null,
+    "displayName": "RenameKeys",
+    "description": "",
+    "group": []
+  },
+  "respondtowebhook": {
+    "action": "n8n-nodes-base.respondtowebhook",
+    "trigger": null,
+    "displayName": "RespondToWebhook",
+    "description": "",
+    "group": []
+  },
+  "rocketchat": {
+    "action": "n8n-nodes-base.rocketchat",
+    "trigger": null,
+    "displayName": "Rocketchat",
+    "description": "",
+    "group": []
+  },
+  "rssfeedread": {
+    "action": "n8n-nodes-base.rssfeedread",
+    "trigger": "n8n-nodes-base.rssfeedreadtrigger",
+    "displayName": "RssFeedRead",
+    "description": "",
+    "group": []
+  },
+  "rundeck": {
+    "action": "n8n-nodes-base.rundeck",
+    "trigger": null,
+    "displayName": "Rundeck",
+    "description": "",
+    "group": []
+  },
+  "s3": {
+    "action": "n8n-nodes-base.s3",
+    "trigger": null,
+    "displayName": "S3",
+    "description": "",
+    "group": []
+  },
+  "salesforce": {
+    "action": "n8n-nodes-base.salesforce",
+    "trigger": null,
+    "displayName": "Salesforce",
+    "description": "",
+    "group": []
+  },
+  "salesmate": {
+    "action": "n8n-nodes-base.salesmate",
+    "trigger": null,
+    "displayName": "Salesmate",
+    "description": "",
+    "group": []
+  },
+  "schedule": {
+    "action": null,
+    "trigger": "n8n-nodes-base.scheduletrigger",
+    "displayName": "ScheduleTrigger",
+    "description": "",
+    "group": []
+  },
+  "seatable": {
+    "action": "n8n-nodes-base.seatable",
+    "trigger": "n8n-nodes-base.seatabletrigger",
+    "displayName": "SeaTable",
+    "description": "",
+    "group": []
+  },
+  "securityscorecard": {
+    "action": "n8n-nodes-base.securityscorecard",
+    "trigger": null,
+    "displayName": "SecurityScorecard",
+    "description": "",
+    "group": []
+  },
+  "segment": {
+    "action": "n8n-nodes-base.segment",
+    "trigger": null,
+    "displayName": "Segment",
+    "description": "",
+    "group": []
+  },
+  "sendgrid": {
+    "action": "n8n-nodes-base.sendgrid",
+    "trigger": null,
+    "displayName": "SendGrid",
+    "description": "",
+    "group": []
+  },
+  "sendy": {
+    "action": "n8n-nodes-base.sendy",
+    "trigger": null,
+    "displayName": "Sendy",
+    "description": "",
+    "group": []
+  },
+  "sentryio": {
+    "action": "n8n-nodes-base.sentryio",
+    "trigger": null,
+    "displayName": "SentryIo",
+    "description": "",
+    "group": []
+  },
+  "servicenow": {
+    "action": "n8n-nodes-base.servicenow",
+    "trigger": null,
+    "displayName": "ServiceNow",
+    "description": "",
+    "group": []
+  },
+  "set": {
+    "action": "n8n-nodes-base.set",
+    "trigger": null,
+    "displayName": "Set",
+    "description": "",
+    "group": []
+  },
+  "shopify": {
+    "action": "n8n-nodes-base.shopify",
+    "trigger": "n8n-nodes-base.shopifytrigger",
+    "displayName": "Shopify",
+    "description": "",
+    "group": []
+  },
+  "signl4": {
+    "action": "n8n-nodes-base.signl4",
+    "trigger": null,
+    "displayName": "Signl4",
+    "description": "",
+    "group": []
+  },
+  "slack": {
+    "action": "n8n-nodes-base.slack",
+    "trigger": null,
+    "displayName": "Slack",
+    "description": "",
+    "group": []
+  },
+  "sms77": {
+    "action": "n8n-nodes-base.sms77",
+    "trigger": null,
+    "displayName": "Sms77",
+    "description": "",
+    "group": []
+  },
+  "snowflake": {
+    "action": "n8n-nodes-base.snowflake",
+    "trigger": null,
+    "displayName": "Snowflake",
+    "description": "",
+    "group": []
+  },
+  "splitinbatches": {
+    "action": "n8n-nodes-base.splitinbatches",
+    "trigger": null,
+    "displayName": "SplitInBatches",
+    "description": "",
+    "group": []
+  },
+  "splunk": {
+    "action": "n8n-nodes-base.splunk",
+    "trigger": null,
+    "displayName": "Splunk",
+    "description": "",
+    "group": []
+  },
+  "spontit": {
+    "action": "n8n-nodes-base.spontit",
+    "trigger": null,
+    "displayName": "Spontit",
+    "description": "",
+    "group": []
+  },
+  "spotify": {
+    "action": "n8n-nodes-base.spotify",
+    "trigger": null,
+    "displayName": "Spotify",
+    "description": "",
+    "group": []
+  },
+  "spreadsheetfile": {
+    "action": "n8n-nodes-base.spreadsheetfile",
+    "trigger": null,
+    "displayName": "SpreadsheetFile",
+    "description": "",
+    "group": []
+  },
+  "sse": {
+    "action": null,
+    "trigger": "n8n-nodes-base.ssetrigger",
+    "displayName": "SseTrigger",
+    "description": "",
+    "group": []
+  },
+  "ssh": {
+    "action": "n8n-nodes-base.ssh",
+    "trigger": null,
+    "displayName": "Ssh",
+    "description": "",
+    "group": []
+  },
+  "stackby": {
+    "action": "n8n-nodes-base.stackby",
+    "trigger": null,
+    "displayName": "Stackby",
+    "description": "",
+    "group": []
+  },
+  "start": {
+    "action": "n8n-nodes-base.start",
+    "trigger": null,
+    "displayName": "Start",
+    "description": "",
+    "group": []
+  },
+  "stickynote": {
+    "action": "n8n-nodes-base.stickynote",
+    "trigger": null,
+    "displayName": "StickyNote",
+    "description": "",
+    "group": []
+  },
+  "stopanderror": {
+    "action": "n8n-nodes-base.stopanderror",
+    "trigger": null,
+    "displayName": "StopAndError",
+    "description": "",
+    "group": []
+  },
+  "storyblok": {
+    "action": "n8n-nodes-base.storyblok",
+    "trigger": null,
+    "displayName": "Storyblok",
+    "description": "",
+    "group": []
+  },
+  "strapi": {
+    "action": "n8n-nodes-base.strapi",
+    "trigger": null,
+    "displayName": "Strapi",
+    "description": "",
+    "group": []
+  },
+  "strava": {
+    "action": "n8n-nodes-base.strava",
+    "trigger": "n8n-nodes-base.stravatrigger",
+    "displayName": "Strava",
+    "description": "",
+    "group": []
+  },
+  "stripe": {
+    "action": "n8n-nodes-base.stripe",
+    "trigger": "n8n-nodes-base.stripetrigger",
+    "displayName": "Stripe",
+    "description": "",
+    "group": []
+  },
+  "supabase": {
+    "action": "n8n-nodes-base.supabase",
+    "trigger": null,
+    "displayName": "Supabase",
+    "description": "",
+    "group": []
+  },
+  "surveymonkey": {
+    "action": null,
+    "trigger": "n8n-nodes-base.surveymonkeytrigger",
+    "displayName": "SurveyMonkeyTrigger",
+    "description": "",
+    "group": []
+  },
+  "switch": {
+    "action": "n8n-nodes-base.switch",
+    "trigger": null,
+    "displayName": "Switch",
+    "description": "",
+    "group": []
+  },
+  "syncromsp": {
+    "action": "n8n-nodes-base.syncromsp",
+    "trigger": null,
+    "displayName": "SyncroMsp",
+    "description": "",
+    "group": []
+  },
+  "taiga": {
+    "action": "n8n-nodes-base.taiga",
+    "trigger": "n8n-nodes-base.taigatrigger",
+    "displayName": "Taiga",
+    "description": "",
+    "group": []
+  },
+  "tapfiliate": {
+    "action": "n8n-nodes-base.tapfiliate",
+    "trigger": null,
+    "displayName": "Tapfiliate",
+    "description": "",
+    "group": []
+  },
+  "telegram": {
+    "action": "n8n-nodes-base.telegram",
+    "trigger": "n8n-nodes-base.telegramtrigger",
+    "displayName": "Telegram",
+    "description": "",
+    "group": []
+  },
+  "thehive": {
+    "action": "n8n-nodes-base.thehive",
+    "trigger": "n8n-nodes-base.thehivetrigger",
+    "displayName": "TheHive",
+    "description": "",
+    "group": []
+  },
+  "thehiveproject": {
+    "action": "n8n-nodes-base.thehiveproject",
+    "trigger": "n8n-nodes-base.thehiveprojecttrigger",
+    "displayName": "TheHiveProject",
+    "description": "",
+    "group": []
+  },
+  "timescaledb": {
+    "action": "n8n-nodes-base.timescaledb",
+    "trigger": null,
+    "displayName": "TimescaleDb",
+    "description": "",
+    "group": []
+  },
+  "todoist": {
+    "action": "n8n-nodes-base.todoist",
+    "trigger": null,
+    "displayName": "Todoist",
+    "description": "",
+    "group": []
+  },
+  "toggl": {
+    "action": null,
+    "trigger": "n8n-nodes-base.toggltrigger",
+    "displayName": "TogglTrigger",
+    "description": "",
+    "group": []
+  },
+  "totp": {
+    "action": "n8n-nodes-base.totp",
+    "trigger": null,
+    "displayName": "Totp",
+    "description": "",
+    "group": []
+  },
+  "travisci": {
+    "action": "n8n-nodes-base.travisci",
+    "trigger": null,
+    "displayName": "TravisCi",
+    "description": "",
+    "group": []
+  },
+  "trello": {
+    "action": "n8n-nodes-base.trello",
+    "trigger": "n8n-nodes-base.trellotrigger",
+    "displayName": "Trello",
+    "description": "",
+    "group": []
+  },
+  "twake": {
+    "action": "n8n-nodes-base.twake",
+    "trigger": null,
+    "displayName": "Twake",
+    "description": "",
+    "group": []
+  },
+  "twilio": {
+    "action": "n8n-nodes-base.twilio",
+    "trigger": null,
+    "displayName": "Twilio",
+    "description": "",
+    "group": []
+  },
+  "twist": {
+    "action": "n8n-nodes-base.twist",
+    "trigger": null,
+    "displayName": "Twist",
+    "description": "",
+    "group": []
+  },
+  "twitter": {
+    "action": "n8n-nodes-base.twitter",
+    "trigger": null,
+    "displayName": "Twitter",
+    "description": "",
+    "group": []
+  },
+  "typeform": {
+    "action": null,
+    "trigger": "n8n-nodes-base.typeformtrigger",
+    "displayName": "TypeformTrigger",
+    "description": "",
+    "group": []
+  },
+  "unleashedsoftware": {
+    "action": "n8n-nodes-base.unleashedsoftware",
+    "trigger": null,
+    "displayName": "UnleashedSoftware",
+    "description": "",
+    "group": []
+  },
+  "uplead": {
+    "action": "n8n-nodes-base.uplead",
+    "trigger": null,
+    "displayName": "Uplead",
+    "description": "",
+    "group": []
+  },
+  "uproc": {
+    "action": "n8n-nodes-base.uproc",
+    "trigger": null,
+    "displayName": "UProc",
+    "description": "",
+    "group": []
+  },
+  "uptimerobot": {
+    "action": "n8n-nodes-base.uptimerobot",
+    "trigger": null,
+    "displayName": "UptimeRobot",
+    "description": "",
+    "group": []
+  },
+  "urlscanio": {
+    "action": "n8n-nodes-base.urlscanio",
+    "trigger": null,
+    "displayName": "UrlScanIo",
+    "description": "",
+    "group": []
+  },
+  "vero": {
+    "action": "n8n-nodes-base.vero",
+    "trigger": null,
+    "displayName": "Vero",
+    "description": "",
+    "group": []
+  },
+  "vonage": {
+    "action": "n8n-nodes-base.vonage",
+    "trigger": null,
+    "displayName": "Vonage",
+    "description": "",
+    "group": []
+  },
+  "wait": {
+    "action": "n8n-nodes-base.wait",
+    "trigger": null,
+    "displayName": "Wait",
+    "description": "",
+    "group": []
+  },
+  "webflow": {
+    "action": "n8n-nodes-base.webflow",
+    "trigger": "n8n-nodes-base.webflowtrigger",
+    "displayName": "Webflow",
+    "description": "",
+    "group": []
+  },
+  "webhook": {
+    "action": "n8n-nodes-base.webhook",
+    "trigger": null,
+    "displayName": "Webhook",
+    "description": "",
+    "group": []
+  },
+  "wekan": {
+    "action": "n8n-nodes-base.wekan",
+    "trigger": null,
+    "displayName": "Wekan",
+    "description": "",
+    "group": []
+  },
+  "whatsapp": {
+    "action": "n8n-nodes-base.whatsapp",
+    "trigger": null,
+    "displayName": "WhatsApp",
+    "description": "",
+    "group": []
+  },
+  "wise": {
+    "action": "n8n-nodes-base.wise",
+    "trigger": "n8n-nodes-base.wisetrigger",
+    "displayName": "Wise",
+    "description": "",
+    "group": []
+  },
+  "woocommerce": {
+    "action": "n8n-nodes-base.woocommerce",
+    "trigger": "n8n-nodes-base.woocommercetrigger",
+    "displayName": "WooCommerce",
+    "description": "",
+    "group": []
+  },
+  "wordpress": {
+    "action": "n8n-nodes-base.wordpress",
+    "trigger": null,
+    "displayName": "Wordpress",
+    "description": "",
+    "group": []
+  },
+  "workable": {
+    "action": null,
+    "trigger": "n8n-nodes-base.workabletrigger",
+    "displayName": "WorkableTrigger",
+    "description": "",
+    "group": []
+  },
+  "workflow": {
+    "action": null,
+    "trigger": "n8n-nodes-base.workflowtrigger",
+    "displayName": "WorkflowTrigger",
+    "description": "",
+    "group": []
+  },
+  "writebinaryfile": {
+    "action": "n8n-nodes-base.writebinaryfile",
+    "trigger": null,
+    "displayName": "WriteBinaryFile",
+    "description": "",
+    "group": []
+  },
+  "wufoo": {
+    "action": null,
+    "trigger": "n8n-nodes-base.wufootrigger",
+    "displayName": "WufooTrigger",
+    "description": "",
+    "group": []
+  },
+  "xero": {
+    "action": "n8n-nodes-base.xero",
+    "trigger": null,
+    "displayName": "Xero",
+    "description": "",
+    "group": []
+  },
+  "xml": {
+    "action": "n8n-nodes-base.xml",
+    "trigger": null,
+    "displayName": "Xml",
+    "description": "",
+    "group": []
+  },
+  "yourls": {
+    "action": "n8n-nodes-base.yourls",
+    "trigger": null,
+    "displayName": "Yourls",
+    "description": "",
+    "group": []
+  },
+  "zammad": {
+    "action": "n8n-nodes-base.zammad",
+    "trigger": null,
+    "displayName": "Zammad",
+    "description": "",
+    "group": []
+  },
+  "zendesk": {
+    "action": "n8n-nodes-base.zendesk",
+    "trigger": "n8n-nodes-base.zendesktrigger",
+    "displayName": "Zendesk",
+    "description": "",
+    "group": []
+  },
+  "zohocrm": {
+    "action": "n8n-nodes-base.zohocrm",
+    "trigger": null,
+    "displayName": "ZohoCrm",
+    "description": "",
+    "group": []
+  },
+  "zoom": {
+    "action": "n8n-nodes-base.zoom",
+    "trigger": null,
+    "displayName": "Zoom",
+    "description": "",
+    "group": []
+  },
+  "zulip": {
+    "action": "n8n-nodes-base.zulip",
+    "trigger": null,
+    "displayName": "Zulip",
+    "description": "",
+    "group": []
+  }
+}

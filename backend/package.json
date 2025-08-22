@@ -1,0 +1,24 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/controllers/index.js",
+    "dev": "nodemon src/controllers/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "axios": "^1.11.0",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "fs-extra": "^11.3.1",
+    "graphlib": "^2.1.8",
+    "nodemon": "^3.1.10",
+    "path": "^0.12.7"
+  }
+}
