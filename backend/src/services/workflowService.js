@@ -61,25 +61,14 @@ function getTriggerNodeType(trigger) {
   // Extract service name (everything before first dot)
   const serviceName = trigger.split(".")[0].toLowerCase();
 
-  // For triggers, we need specific trigger node types
-  const triggerMappings = {
-    github: "n8n-nodes-base.githubTrigger",
-    google_sheets: "n8n-nodes-base.googleSheetsTrigger",
-    schedule: "n8n-nodes-base.scheduleTrigger",
-    webhook: "n8n-nodes-base.webhook",
-    shopify: "n8n-nodes-base.shopifyTrigger",
-    airtable: "n8n-nodes-base.airtableTrigger",
-    typeform: "n8n-nodes-base.typeformTrigger",
-    discord: "n8n-nodes-base.discordTrigger",
-    telegram: "n8n-nodes-base.telegramTrigger",
-    trello: "n8n-nodes-base.trelloTrigger",
-    notion: "n8n-nodes-base.notionTrigger",
-    slack: "n8n-nodes-base.slackTrigger",
-    stripe: "n8n-nodes-base.stripeTrigger",
-    twitter: "n8n-nodes-base.twitterTrigger",
-  };
+  // Try to find trigger version first
+  const triggerNodeName = serviceName + "trigger"; // e.g., "airtabletrigger"
+  if (nodeCatalog[triggerNodeName]) {
+    return nodeCatalog[triggerNodeName];
+  }
 
-  return triggerMappings[serviceName] || "n8n-nodes-base.manualTrigger";
+  // Fallback to manual trigger
+  return "n8n-nodes-base.manualTrigger";
 }
 
 // Dynamic action node type mapping using node catalog
