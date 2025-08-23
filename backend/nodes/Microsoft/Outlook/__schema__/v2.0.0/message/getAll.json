@@ -1,0 +1,24 @@
+{
+    "type": "object",
+    "properties": {
+        "bodyPreview": {
+            "type": "string"
+        },
+        "categories": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "conversationId": {
+            "type": "string"
+        },
+        "hasAttachments": {
+            "type": "boolean"
+        },
+        "id": {
+            "type": "string"
+        }
+    },
+    "version": 6
+}

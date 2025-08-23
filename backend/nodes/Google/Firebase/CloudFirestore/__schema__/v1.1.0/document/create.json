@@ -1,0 +1,12 @@
+{
+    "type": "object",
+    "properties": {
+        "_id": {
+            "type": "string"
+        },
+        "_name": {
+            "type": "string"
+        }
+    },
+    "version": 3
+}

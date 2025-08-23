@@ -1,0 +1,15 @@
+{
+    "type": "object",
+    "properties": {
+        "dealId": {
+            "type": "integer"
+        },
+        "isDeleted": {
+            "type": "boolean"
+        },
+        "portalId": {
+            "type": "integer"
+        }
+    },
+    "version": 6
+}
