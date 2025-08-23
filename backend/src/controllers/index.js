@@ -10,7 +10,7 @@ const PASSWORD = process.env.N8N_PASSWORD;
 
 async function main() {
   const englishInput =
-    "When someone mentions my brand on Twitter, analyze the sentiment with OpenAI, log it in Airtable, and send an alert to Slack if negative"; // Convert English → JSON intent
+    "EveryDay create a post about haiku anime and post it in my telegram channel"; // Convert English → JSON intent
   const userJson = await getUserJsonFromEnglish(englishInput);
 
   // Deploy workflow
