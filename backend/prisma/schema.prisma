@@ -21,6 +21,20 @@ model User {
   password  String
   n8nUrl    String   // User's n8n instance URL
   n8nApiKey String   // User's n8n API key
-  workflows Json[]   // Stores workflows as JSON
   createdAt DateTime @default(now())
+
+  workflows Workflow[] // relation (1 user → many workflows)
+
+}
+
+model Workflow {
+  id        Int      @id @default(autoincrement())
+  name      String   // Workflow name
+  data      Json     // Actual workflow definition
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relation to User
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
 }
