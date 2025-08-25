@@ -15,9 +15,6 @@ export class UserService {
   async getUserById(id) {
     return prisma.user.findUnique({ where: { id } });
   }
-  async getWorkflowsForUser(userId) {
-    return prisma.workflow.findMany({ where: { userId } });
-  }
   async deleteUser(id, data) {
     return prisma.user.delete({ where: { id }, data });
   }
