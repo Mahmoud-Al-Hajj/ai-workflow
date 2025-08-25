@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/controllers/index.js",
-    "dev": "nodemon src/controllers/index.js",
+    "api": "node src/api.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
