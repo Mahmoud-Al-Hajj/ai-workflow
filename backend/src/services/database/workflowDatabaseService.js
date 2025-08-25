@@ -58,7 +58,15 @@ export class WorkflowDatabaseService {
   }
 
   async getWorkflowById(id) {
-    return prisma.workflow.findUnique({ where: { id } });
+    return prisma.workflow.findUnique({ where: { id: parseInt(id) } });
+  }
+
+  async getAllWorkflows() {
+    return prisma.workflow.findMany({
+      include: {
+        user: true, // Include user info
+      },
+    });
   }
   async getWorkflowsForUser(userId) {
     return prisma.workflow.findMany({ where: { userId } });

@@ -1,4 +1,4 @@
-import prisma from "../lib/prisma.js";
+import prisma from "../../lib/prisma.js";
 
 export class UserService {
   async createUser({ name, email, password, n8nUrl, n8nApiKey }) {
@@ -12,10 +12,34 @@ export class UserService {
       },
     });
   }
-  async getUserById(id) {
-    return prisma.user.findUnique({ where: { id } });
+
+  async getAllUsers() {
+    return prisma.user.findMany({
+      include: {
+        workflows: true, // Include user's workflows
+      },
+    });
   }
-  async deleteUser(id, data) {
-    return prisma.user.delete({ where: { id }, data });
+
+  async getUserById(id) {
+    return prisma.user.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        workflows: true,
+      },
+    });
+  }
+
+  async updateUser(id, updateData) {
+    return prisma.user.update({
+      where: { id: parseInt(id) },
+      data: updateData,
+    });
+  }
+
+  async deleteUser(id) {
+    return prisma.user.delete({
+      where: { id: parseInt(id) },
+    });
   }
 }
