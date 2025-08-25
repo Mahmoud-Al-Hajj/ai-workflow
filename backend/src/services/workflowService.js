@@ -7,7 +7,6 @@ function buildWorkflow(userJson) {
     name: "AI Generated Workflow",
     nodes: [],
     connections: {},
-    active: false,
   };
   //create a new workflow object and initialize it.
   let nodeId = 1;

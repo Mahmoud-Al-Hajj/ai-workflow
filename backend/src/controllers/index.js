@@ -5,16 +5,17 @@ import { deployWorkflow } from "../services/deploymentService.js";
 // Load environment variables
 dotenv.config();
 
-const EMAIL = process.env.N8N_EMAIL;
-const PASSWORD = process.env.N8N_PASSWORD;
+const API_KEY = process.env.N8N_API_KEY;
+const N8N_URL = process.env.N8N_URL;
 
 async function main() {
   const englishInput =
-    "EveryDay create a post about Demon Slayer anime and post it in my telegram channel"; // Convert English → JSON intent
+    "Every Monday at 9 AM, pull data from Airtable, generate a report with OpenAI, post it to Notion, and share in Discord";
+  // Convert English → JSON intent
   const userJson = await getUserJsonFromEnglish(englishInput);
 
-  // Deploy workflow
-  await deployWorkflow(userJson, EMAIL, PASSWORD);
+  // Deploy workflow using API key
+  await deployWorkflow(userJson, API_KEY, N8N_URL);
 
   console.log("ENGLISH INPUT:", englishInput);
   console.log("AI OUTPUT:", JSON.stringify(userJson, null, 2));
