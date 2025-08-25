@@ -10,7 +10,7 @@ const PASSWORD = process.env.N8N_PASSWORD;
 
 async function main() {
   const englishInput =
-    "EveryDay create a post about haiku anime and post it in my telegram channel"; // Convert English → JSON intent
+    "EveryDay create a post about Demon Slayer anime and post it in my telegram channel"; // Convert English → JSON intent
   const userJson = await getUserJsonFromEnglish(englishInput);
 
   // Deploy workflow
