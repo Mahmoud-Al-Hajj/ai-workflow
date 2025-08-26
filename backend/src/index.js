@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
-import { getUserJsonFromEnglish } from "../services/aiService.js";
-import { deployWorkflow } from "../services/deploymentService.js";
+import { getUserJsonFromEnglish } from "./services/aiService.js";
+import { deployWorkflow } from "./services/deploymentService.js";
 
 // Load environment variables
 dotenv.config();

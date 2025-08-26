@@ -3,7 +3,7 @@ import { WorkflowDatabaseService } from "../services/database/workflowDatabaseSe
 
 const router = express.Router();
 
-router.get("/api/workflows", async (req, res) => {
+router.get("/workflows", async (req, res) => {
   try {
     const workflows = await WorkflowDatabaseService.getAllWorkflows();
     res.json({
@@ -17,7 +17,7 @@ router.get("/api/workflows", async (req, res) => {
     });
   }
 });
-router.get("/api/workflows/:id", async (req, res) => {
+router.get("/workflows/:id", async (req, res) => {
   const workflowId = req.params.id;
   try {
     const workflow = await WorkflowDatabaseService.getWorkflowById(workflowId);
@@ -39,7 +39,7 @@ router.get("/api/workflows/:id", async (req, res) => {
     });
   }
 });
-router.get("/api/workflows/user/:userID", async (req, res) => {
+router.get("/workflows/user/:userID", async (req, res) => {
   const userID = req.params.userID;
   try {
     const userWorkflows = await WorkflowDatabaseService.getWorkflowsForUser(
@@ -56,7 +56,7 @@ router.get("/api/workflows/user/:userID", async (req, res) => {
     });
   }
 });
-router.post("/api/workflows", async (req, res) => {
+router.post("/workflows", async (req, res) => {
   const newWorkflow = req.body;
   try {
     const createdWorkflow =
@@ -72,7 +72,7 @@ router.post("/api/workflows", async (req, res) => {
     });
   }
 });
-router.delete("/api/workflows/:id", async (req, res) => {
+router.delete("/workflows/:id", async (req, res) => {
   const workflowId = req.params.id;
   try {
     await WorkflowDatabaseService.deleteWorkflow(workflowId);
