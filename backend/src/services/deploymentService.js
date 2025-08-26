@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import { createN8nWorkflow } from "./n8nAuthService.js";
-import { buildWorkflow } from "./workflowService.js";
+import { buildWorkflow } from "./WorkflowService.js";
 
 // Load environment variables
 dotenv.config();

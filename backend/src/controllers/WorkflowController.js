@@ -1,5 +1,5 @@
 // Import what you need
-import { WorkflowService } from "../services/database/workflowDatabaseService.js";
+import { WorkflowService } from "../services/database/workflowDBService.js";
 
 // Create the class
 export class WorkflowController {

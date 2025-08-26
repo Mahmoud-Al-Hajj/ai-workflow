@@ -1,6 +1,6 @@
 import prisma from "../../lib/prisma.js";
 import { getUserJsonFromEnglish } from "../aiService.js";
-import { buildWorkflow } from "../workflowService.js";
+import { buildWorkflow } from "../WorkflowService.js";
 import { deployWorkflow } from "../deploymentService.js";
 
 export class WorkflowDatabaseService {

@@ -42,4 +42,10 @@ export class UserService {
       where: { id: parseInt(id) },
     });
   }
+
+  async getUserByEmail(email) {
+    return prisma.user.findUnique({
+      where: { email },
+    });
+  }
 }
