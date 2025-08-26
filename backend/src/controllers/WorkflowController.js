@@ -1,15 +1,24 @@
 // Import what you need
-import { WorkflowService } from "../services/database/workflowDBService.js";
+import { WorkflowService } from "../services/workflowService.js";
 
 // Create the class
 export class WorkflowController {
+  constructor() {
+    this.workflowService = new WorkflowService();
+  }
+
   async createCompleteWorkflow(req, res) {
-    const workflowData = req.body;
+    const { description, userId, n8nUrl, n8nApiKey } = req.body;
     try {
-      const newWorkflow = await WorkflowService.createWorkflow(workflowData);
+      const result = await this.workflowService.createCompleteWorkflow({
+        description,
+        userId,
+        n8nUrl,
+        n8nApiKey,
+      });
       res.status(201).json({
         success: true,
-        data: newWorkflow,
+        data: result,
       });
     } catch (error) {
       res.status(500).json({
@@ -21,7 +30,7 @@ export class WorkflowController {
 
   async getAllWorkflows(req, res) {
     try {
-      const workflows = await WorkflowService.getAllWorkflows();
+      const workflows = await this.workflowService.getAllWorkflows();
       res.json({
         success: true,
         data: workflows,
@@ -37,7 +46,7 @@ export class WorkflowController {
   async getWorkflowById(req, res) {
     const id = req.params.id;
     try {
-      const workflow = await WorkflowService.getWorkflowById(id);
+      const workflow = await this.workflowService.getWorkflowById(id);
       if (!workflow) {
         return res.status(404).json({
           success: false,
@@ -59,7 +68,7 @@ export class WorkflowController {
   async getWorkflowsForUser(req, res) {
     const userId = req.params.userId;
     try {
-      const workflows = await WorkflowService.getWorkflowsForUser(userId);
+      const workflows = await this.workflowService.getWorkflowsForUser(userId);
       res.json({
         success: true,
         data: workflows,
@@ -71,10 +80,11 @@ export class WorkflowController {
       });
     }
   }
+
   async deleteWorkflow(req, res) {
     const id = req.params.id;
     try {
-      const deleted = await WorkflowService.deleteWorkflow(id);
+      const deleted = await this.workflowService.deleteWorkflow(id);
       if (!deleted) {
         return res.status(404).json({
           success: false,

@@ -1,6 +1,6 @@
 import prisma from "../../lib/prisma.js";
 
-export class UserService {
+export class UserDBService {
   async createUser({ name, email, password, n8nUrl, n8nApiKey }) {
     return prisma.user.create({
       data: {
