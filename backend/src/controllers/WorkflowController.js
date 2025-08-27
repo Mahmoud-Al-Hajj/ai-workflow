@@ -16,7 +16,7 @@ export class WorkflowController {
         n8nUrl,
         n8nApiKey,
       });
-      res.status(201).json({
+      res.status(200).json({
         success: true,
         data: result,
       });
