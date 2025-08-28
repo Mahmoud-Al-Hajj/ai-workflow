@@ -24,8 +24,8 @@ You are an expert AI that converts any natural language workflow description int
 {
   "trigger": "<trigger>",
   "actions": [
-    { 
-      "action": "<action>", 
+    {
+      "action": "<action>",
       "params": { "<k>": "<v>" },
       "mode": "sequential|parallel"
     }
