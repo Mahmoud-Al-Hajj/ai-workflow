@@ -10,7 +10,7 @@ function authMiddleware(req, res, next) {
   const token = header.split(" ")[1];
   try {
     const payload = JWT.verify(token, process.env.JWT_SECRET);
-    req.user = payload; // attach user info
+    req.user = payload;
     next();
   } catch (err) {
     return res.status(403).json({ error: "Invalid token" });

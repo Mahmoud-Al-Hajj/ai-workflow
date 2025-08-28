@@ -16,11 +16,11 @@ export async function deployWorkflow(userJson, apiKey, n8nUrl) {
     // Deploy to n8n using API key
     const result = await createN8nWorkflow(apiKey, n8nUrl, workflow);
 
-    console.log("✅ Workflow deployed successfully!");
+    console.log("Workflow deployed successfully!");
     console.log("Response data:", JSON.stringify(result, null, 2));
     return result.data?.id || result.id;
   } catch (err) {
-    console.error("❌ Deployment failed:", err.message);
+    console.error("Deployment failed:", err.message);
     throw err;
   }
 }

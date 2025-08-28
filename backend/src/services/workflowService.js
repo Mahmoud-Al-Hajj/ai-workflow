@@ -51,6 +51,8 @@ export class WorkflowService {
     };
     //create a new workflow object and initialize it.
     let nodeId = 1;
+    let sequentialCount = 0; // Track sequential nodes for positioning
+    let parallelCount = 0; // Track parallel nodes for positioning
 
     // Add trigger node
     workflow.nodes.push({
@@ -58,10 +60,10 @@ export class WorkflowService {
       name: "Trigger",
       type: this.getTriggerNodeType(userJson.trigger),
       typeVersion: 1,
-      position: [250, 300],
+      position: [200, 300],
       parameters: {},
     });
-
+    let prevNodeName = "Trigger";
     nodeId++;
 
     // Add all action nodes dynamically
@@ -69,27 +71,46 @@ export class WorkflowService {
       // Use dynamic node mapping for ALL services
       const nodeType = this.getActionNodeType(actionObj.action);
 
+      let nodePosition;
+      if (actionObj.mode === "sequential") {
+        // Sequential nodes flow horizontally to the right
+        nodePosition = [400 + sequentialCount * 200, 200];
+        sequentialCount++;
+      } else {
+        // Parallel nodes spread vertically from trigger
+        nodePosition = [400, 50 + parallelCount * 370];
+        parallelCount++;
+      }
+
       const node = {
         id: `${nodeId}`,
         name: actionObj.action,
         type: nodeType,
         typeVersion: 1,
-        position: [450, 300 + (nodeId - 2) * 200],
+        position: nodePosition,
         parameters: actionObj.params || {},
       };
 
       workflow.nodes.push(node);
-
+      let fromNode;
+      if (actionObj.mode === "sequential") {
+        fromNode = prevNodeName; // chain after the last node
+      } else {
+        fromNode = "Trigger"; // branch directly from the trigger
+      }
       // Connect trigger node to this action node using node names
-      workflow.connections["Trigger"] = workflow.connections["Trigger"] || {
+      workflow.connections[fromNode] = workflow.connections[fromNode] || {
         main: [[]],
       };
-      workflow.connections["Trigger"].main[0].push({
+      workflow.connections[fromNode].main[0].push({
         node: actionObj.action,
         type: "main",
         index: 0,
       });
-
+      // Only update prevNodeName if sequential
+      if (actionObj.mode === "sequential") {
+        prevNodeName = actionObj.action;
+      }
       nodeId++;
     }
 
