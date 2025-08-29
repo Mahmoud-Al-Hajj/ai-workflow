@@ -19,9 +19,9 @@ export class UserController {
 
   async register(req, res) {
     try {
-      const { username, email, password, n8nUrl, n8nApiKey } = req.body;
+      const { name, email, password, n8nUrl, n8nApiKey } = req.body;
       const result = await this.authService.register({
-        username,
+        name,
         email,
         password,
         n8nUrl,

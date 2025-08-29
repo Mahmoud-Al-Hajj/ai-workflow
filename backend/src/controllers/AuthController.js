@@ -8,6 +8,7 @@ export class AuthController {
   async login(req, res) {
     try {
       const { email, password } = req.body;
+      console.log(req.body);
       const result = await this.authService.login(email, password);
       res.status(200).json(result);
     } catch (err) {
@@ -17,9 +18,10 @@ export class AuthController {
 
   async register(req, res) {
     try {
-      const { username, email, password, n8nUrl, n8nApiKey } = req.body;
+      console.log("Register request body:", req.body); // Debug log
+      const { name, email, password, n8nUrl, n8nApiKey } = req.body;
       const result = await this.authService.register({
-        username,
+        name,
         email,
         password,
         n8nUrl,

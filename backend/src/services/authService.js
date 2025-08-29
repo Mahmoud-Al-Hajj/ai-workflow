@@ -9,20 +9,19 @@ class AuthService {
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) throw new Error("Invalid credentials");
 
-    const valid = await bcrypt.compare(password, user.passwordHash);
+    const valid = await bcrypt.compare(password, user.password);
     if (!valid) throw new Error("Invalid credentials");
 
     const token = generateToken(user.id);
     return { user, token };
   }
-  async register({ username, email, password, n8nUrl, n8nApiKey }) {
+  async register({ name, email, password, n8nUrl, n8nApiKey }) {
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const user = await prisma.user.create({
       data: {
-        username,
+        name,
         email,
-        passwordHash: hashedPassword,
+        password: hashedPassword,
         n8nUrl,
         n8nApiKey,
       },
