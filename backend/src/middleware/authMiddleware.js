@@ -1,19 +1,25 @@
-import JWT from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import { PrismaClient } from "@prisma/client";
 
 dotenv.config();
+const prisma = new PrismaClient();
 
-function authMiddleware(req, res, next) {
-  const header = req.headers["authorization"];
-  if (!header) return res.status(401).json({ error: "Missing token" });
+export async function authMiddleware(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ error: "No token provided" });
 
-  const token = header.split(" ")[1];
+  const token = authHeader.split(" ")[1];
   try {
-    const payload = JWT.verify(token, process.env.JWT_SECRET);
-    req.user = payload;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+    });
+    if (!user) return res.status(401).json({ error: "Invalid token" });
+
+    req.user = user;
     next();
   } catch (err) {
-    return res.status(403).json({ error: "Invalid token" });
+    res.status(401).json({ error: "Unauthorized" });
   }
 }
-export default authMiddleware;
