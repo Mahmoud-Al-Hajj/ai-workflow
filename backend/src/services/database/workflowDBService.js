@@ -7,7 +7,7 @@ export class WorkflowDatabaseService {
       data: {
         name,
         data,
-        userId,
+        userId: Number(userId),
       },
       include: {
         user: true,
@@ -27,9 +27,11 @@ export class WorkflowDatabaseService {
     });
   }
   async getWorkflowsForUser(userId) {
-    return prisma.workflow.findMany({ where: { userId } });
+    return prisma.workflow.findMany({
+      where: { userId: Number(userId) },
+    });
   }
   async deleteWorkflow(id) {
-    return prisma.workflow.delete({ where: { id } });
+    return prisma.workflow.delete({ where: { id: Number(id) } });
   }
 }

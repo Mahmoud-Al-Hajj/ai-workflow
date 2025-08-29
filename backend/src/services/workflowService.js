@@ -26,7 +26,7 @@ export class WorkflowService {
       const savedWorkflow = await this.workflowDBService.createWorkflow({
         name: description.substring(0, 50) + "...",
         data: n8nWorkflow,
-        userId,
+        userId: Number(userId), //la et2akad enu keef ma nb3tt rej3a integer
       });
 
       return {
