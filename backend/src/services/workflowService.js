@@ -49,6 +49,8 @@ export class WorkflowService {
         retryOnFail: true,
         maxExecutionRetries: 3,
         retryDelay: 30000,
+        saveExecutionProgress: "all",
+        //add timezone for cron jobs.
       },
     };
 
