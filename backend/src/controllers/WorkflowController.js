@@ -1,20 +1,21 @@
 // Import what you need
-import { WorkflowDatabaseService } from "../services/database/workflowDBService.js";
-import { WorkflowService } from "../services/workflowService.js";
+
+import { workflowService } from "../services/workflowService.js";
 
 // Create the class
 export class WorkflowController {
   constructor() {
-    this.workflowService = new WorkflowDatabaseService();
+    this.workflowService = workflowService;
   }
 
   async createCompleteWorkflow(req, res) {
-    const { name, data, userId } = req.body;
+    const { description, userId, n8nUrl, n8nApiKey } = req.body;
     try {
       const result = await this.workflowService.createCompleteWorkflow({
-        name,
-        data,
+        description,
         userId,
+        n8nUrl,
+        n8nApiKey,
       });
       res.status(201).json({
         success: true,
