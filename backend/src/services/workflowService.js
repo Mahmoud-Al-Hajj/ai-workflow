@@ -9,26 +9,22 @@ export class WorkflowService {
     this.workflowDBService = new WorkflowDatabaseService();
   }
 
-  // Main business logic method - moved from workflowDBService
   async createCompleteWorkflow({ description, userId, n8nUrl, n8nApiKey }) {
     try {
-      // Step 1: Generate AI workflow JSON from English
       const aiWorkflowJson = await getUserJsonFromEnglish(description);
 
-      // Step 2: Deploy to n8n using AI JSON (deployWorkflow builds internally)
+      // Deploy to n8n using AI JSON (deployWorkflow builds internally)
       const n8nWorkflowId = await deployWorkflow(
         aiWorkflowJson,
         n8nApiKey,
         n8nUrl
       );
 
-      // Step 3: Build n8n workflow format for response
       const n8nWorkflow = this.buildWorkflow(aiWorkflowJson);
-
       // Step 4: Save to database
       const savedWorkflow = await this.workflowDBService.createWorkflow({
         name: description.substring(0, 50) + "...",
-        data: aiWorkflowJson,
+        data: n8nWorkflow,
         userId,
       });
 
@@ -49,72 +45,94 @@ export class WorkflowService {
       nodes: [],
       connections: {},
     };
-    //create a new workflow object and initialize it.
+
     let nodeId = 1;
-    let sequentialCount = 0; // Track sequential nodes for positioning
-    let parallelCount = 0; // Track parallel nodes for positioning
+    let sequentialCount = 0;
+    let parallelCount = 0;
+    let prevNodeName = "Trigger";
 
     // Add trigger node
-    workflow.nodes.push({
-      id: `${nodeId}`,
-      name: "Trigger",
-      type: this.getTriggerNodeType(userJson.trigger),
-      typeVersion: 1,
-      position: [200, 300],
-      parameters: {},
-    });
-    let prevNodeName = "Trigger";
+    workflow.nodes.push(
+      this.createNode({
+        id: nodeId,
+        name: "Trigger",
+        type: this.getTriggerNodeType(userJson.trigger),
+        position: [200, 300],
+        parameters: {},
+      })
+    );
+
     nodeId++;
 
-    // Add all action nodes dynamically
     for (const actionObj of userJson.actions) {
-      // Use dynamic node mapping for ALL services
       const nodeType = this.getActionNodeType(actionObj.action);
 
-      let nodePosition;
+      const nodePosition = this.getNodePosition(
+        actionObj.mode,
+        sequentialCount,
+        parallelCount
+      );
+
+      workflow.nodes.push(
+        this.createNode({
+          id: nodeId,
+          name: actionObj.action,
+          type: nodeType,
+          position: nodePosition,
+          parameters: actionObj.params || {},
+        })
+      );
+
+      let fromNode;
       if (actionObj.mode === "sequential") {
-        // Sequential nodes flow horizontally to the right
-        nodePosition = [400 + sequentialCount * 200, 200];
+        fromNode = prevNodeName;
+      } else {
+        fromNode = "Trigger";
+      }
+
+      this.addConnection(workflow, fromNode, actionObj.action);
+
+      if (actionObj.mode === "sequential") {
+        prevNodeName = actionObj.action;
         sequentialCount++;
       } else {
-        // Parallel nodes spread vertically from trigger
-        nodePosition = [400, 50 + parallelCount * 370];
         parallelCount++;
       }
 
-      const node = {
-        id: `${nodeId}`,
-        name: actionObj.action,
-        type: nodeType,
-        typeVersion: 1,
-        position: nodePosition,
-        parameters: actionObj.params || {},
-      };
-
-      workflow.nodes.push(node);
-      let fromNode;
-      if (actionObj.mode === "sequential") {
-        fromNode = prevNodeName; // chain after the last node
-      } else {
-        fromNode = "Trigger"; // branch directly from the trigger
-      }
-      // Connect trigger node to this action node using node names
-      workflow.connections[fromNode] = workflow.connections[fromNode] || {
-        main: [[]],
-      };
-      workflow.connections[fromNode].main[0].push({
-        node: actionObj.action,
-        type: "main",
-        index: 0,
-      });
-      // Only update prevNodeName if sequential
-      if (actionObj.mode === "sequential") {
-        prevNodeName = actionObj.action;
-      }
       nodeId++;
     }
 
     return workflow;
+  }
+
+  createNode({ id, name, type, position, parameters }) {
+    return {
+      id: `${id}`,
+      name,
+      type,
+      typeVersion: 1,
+      position,
+      parameters,
+    };
+  }
+
+  getNodePosition(mode, sequentialCount, parallelCount) {
+    if (mode === "sequential") {
+      return [400 + sequentialCount * 200, 200];
+    } else {
+      return [400, 50 + parallelCount * 370];
+    }
+  }
+
+  addConnection(workflow, fromNode, toNode) {
+    if (!workflow.connections[fromNode]) {
+      workflow.connections[fromNode] = { main: [[]] };
+    }
+    workflow.connections[fromNode].main[0].push({
+      node: toNode,
+      type: "main",
+      index: 0,
+    });
   }
 
   // Dynamic trigger node type mapping using node catalog
