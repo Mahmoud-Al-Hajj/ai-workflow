@@ -144,7 +144,7 @@ export class WorkflowService {
     // Extract service name (everything before first dot)
     const serviceName = trigger.split(".")[0].toLowerCase();
     if (trigger.startsWith("schedule.")) {
-      return "n8n-nodes-base.scheduleTrigger"; // Use n8n Schedule Trigger node
+      return "n8n-nodes-base.cron"; // Use n8n Schedule Trigger node
     }
     // Try to find trigger version first
     const triggerNodeName = serviceName + "trigger"; // e.g., "airtabletrigger"
