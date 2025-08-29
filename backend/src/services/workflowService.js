@@ -45,7 +45,11 @@ export class WorkflowService {
       name: "AI Generated Workflow",
       nodes: [],
       connections: {},
-      settings: {},
+      settings: {
+        retryOnFail: true,
+        maxExecutionRetries: 3,
+        retryDelay: 30000,
+      },
     };
 
     let nodeId = 1;
