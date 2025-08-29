@@ -6,22 +6,28 @@ export class AuthController {
   }
 
   async login(req, res) {
-    const { email, password } = req.body;
     try {
+      const { email, password } = req.body;
       const result = await this.authService.login(email, password);
-      res.json({ success: true, data: result });
-    } catch (error) {
-      res.status(401).json({ success: false, error: error.message });
+      res.status(200).json(result);
+    } catch (err) {
+      res.status(400).json({ error: err.message });
     }
   }
 
   async register(req, res) {
-    const userData = req.body;
     try {
-      const result = await this.authService.register(userData);
-      res.status(201).json({ success: true, data: result });
-    } catch (error) {
-      res.status(400).json({ success: false, error: error.message });
+      const { username, email, password, n8nUrl, n8nApiKey } = req.body;
+      const result = await this.authService.register({
+        username,
+        email,
+        password,
+        n8nUrl,
+        n8nApiKey,
+      });
+      res.status(201).json(result);
+    } catch (err) {
+      res.status(400).json({ error: err.message });
     }
   }
 }

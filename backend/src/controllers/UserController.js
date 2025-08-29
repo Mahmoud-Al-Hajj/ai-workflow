@@ -1,23 +1,35 @@
 import { UserService } from "../services/UserService.js";
+import { AuthService } from "../services/authService.js";
 
 export class UserController {
   constructor() {
     this.userService = new UserService();
+    this.authService = new AuthService();
   }
 
-  async createUser(req, res) {
-    const newUser = req.body;
+  async login(req, res) {
     try {
-      const user = await this.userService.createUser(newUser);
-      res.status(201).json({
-        success: true,
-        data: user,
+      const { email, password } = req.body;
+      const result = await this.authService.login(email, password);
+      res.status(200).json(result);
+    } catch (err) {
+      res.status(400).json({ error: err.message });
+    }
+  }
+
+  async register(req, res) {
+    try {
+      const { username, email, password, n8nUrl, n8nApiKey } = req.body;
+      const result = await this.authService.register({
+        username,
+        email,
+        password,
+        n8nUrl,
+        n8nApiKey,
       });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        error: error.message,
-      });
+      res.status(201).json(result);
+    } catch (err) {
+      res.status(400).json({ error: err.message });
     }
   }
 
