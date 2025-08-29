@@ -21,6 +21,7 @@ export class WorkflowService {
       );
 
       const n8nWorkflow = this.buildWorkflow(aiWorkflowJson);
+      console.log(n8nWorkflow);
       // Step 4: Save to database
       const savedWorkflow = await this.workflowDBService.createWorkflow({
         name: description.substring(0, 50) + "...",
@@ -44,6 +45,7 @@ export class WorkflowService {
       name: "AI Generated Workflow",
       nodes: [],
       connections: {},
+      settings: {},
     };
 
     let nodeId = 1;
@@ -57,8 +59,9 @@ export class WorkflowService {
         id: nodeId,
         name: "Trigger",
         type: this.getTriggerNodeType(userJson.trigger),
+        typeVersion: 1,
         position: [200, 300],
-        parameters: {},
+        parameters: userJson.triggerParams || {},
       })
     );
 
@@ -78,6 +81,7 @@ export class WorkflowService {
           id: nodeId,
           name: actionObj.action,
           type: nodeType,
+          typeVersion: 1,
           position: nodePosition,
           parameters: actionObj.params || {},
         })
@@ -139,7 +143,9 @@ export class WorkflowService {
   getTriggerNodeType(trigger) {
     // Extract service name (everything before first dot)
     const serviceName = trigger.split(".")[0].toLowerCase();
-
+    if (trigger.startsWith("schedule.")) {
+      return "n8n-nodes-base.scheduleTrigger"; // Use n8n Schedule Trigger node
+    }
     // Try to find trigger version first
     const triggerNodeName = serviceName + "trigger"; // e.g., "airtabletrigger"
     if (this.nodeCatalog[triggerNodeName]) {
@@ -159,7 +165,6 @@ export class WorkflowService {
     return this.nodeCatalog[serviceName] || "n8n-nodes-base.set";
   }
 
-  // Additional CRUD methods for database operations
   async getAllWorkflows() {
     return await this.workflowDBService.getAllWorkflows();
   }
