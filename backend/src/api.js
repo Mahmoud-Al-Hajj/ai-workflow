@@ -1,7 +1,7 @@
 import express from "express";
 import rateLimit from "express-rate-limit";
 import dotenv from "dotenv";
-
+import cors from "cors";
 // Import your routes
 import userRoutes from "./routes/userRoutes.js";
 import workflowRoutes from "./routes/workflowRoutes.js";
@@ -24,6 +24,7 @@ const limiter = rateLimit({
 
 // Middleware
 app.use(express.json());
+app.use(cors());
 app.use(limiter);
 
 // Routes
@@ -58,5 +59,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

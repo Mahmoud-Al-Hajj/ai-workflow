@@ -39,8 +39,8 @@ export const validateRegister = [
     .withMessage("password must be a string")
     .notEmpty()
     .withMessage("password is required")
-    .isLength({ min: 6 })
-    .withMessage("password must be at least 6 characters long"),
+    .isLength({ min: 6, max: 100 })
+    .withMessage("password must between 6 and 100 characters long"),
   body("n8nUrl").isString().notEmpty(),
   body("n8nApiKey").notEmpty().withMessage("n8nApiKey is required"),
   (req, res, next) => {
