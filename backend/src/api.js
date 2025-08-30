@@ -14,8 +14,12 @@ const PORT = process.env.PORT || 3000;
 
 const limiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: 10, // Limit each IP to 10 requests
-  message: "request limit reached",
+  max: 50, // Limit each IP to 50 requests
+  message: {
+    status: 429,
+    error: "Too many requests",
+    message: "You have exceeded the rate limit. Try again later.",
+  },
 });
 
 // Middleware
@@ -27,8 +31,30 @@ app.use("/api", userRoutes);
 app.use("/api", workflowRoutes);
 
 // Health check
-app.get("/", (req, res) => {
-  res.json({ message: "lak ezzzzzzzzzz" });
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    uptime: process.uptime(),
+    timestamp: Date.now(),
+    env: NODE_ENV,
+  });
+});
+//handling 404 (route not found).
+app.use((req, res) => {
+  res.status(404).json({
+    error: "Not Found",
+    message: `Route ${req.originalUrl} not found`,
+  });
+});
+
+// handling all other errors
+app.use((err, req, res, next) => {
+  console.error("❌ Error:", err);
+
+  res.status(err.status || 500).json({
+    error: err.name || "InternalServerError",
+    message: err.message || "Something went wrong",
+  });
 });
 
 app.listen(PORT, () => {
