@@ -1,8 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "../lib/prisma.js";
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils/jwt.js";
-
-const prisma = new PrismaClient();
 
 class AuthService {
   async login(email, password) {

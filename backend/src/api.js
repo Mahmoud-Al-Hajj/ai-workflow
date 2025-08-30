@@ -37,7 +37,7 @@ app.get("/health", (req, res) => {
     status: "ok",
     uptime: process.uptime(),
     timestamp: Date.now(),
-    env: NODE_ENV,
+    env: proccess.env.NODE_ENV || "development",
   });
 });
 //handling 404 (route not found).
