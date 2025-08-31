@@ -47,11 +47,7 @@ export class WorkflowService {
       nodes: [],
       connections: {},
       settings: {
-        retryOnFail: true,
-        maxExecutionRetries: 3,
-        retryDelay: 30000,
-        saveExecutionProgress: "all",
-        //add timezone for cron jobs.
+        saveExecutionProgress: true,
       },
     };
 

@@ -32,12 +32,12 @@ app.use("/api", userRoutes);
 app.use("/api", workflowRoutes);
 
 // Health check
-app.get("/health", (req, res) => {
+app.get("/", (req, res) => {
   res.status(200).json({
     status: "ok",
     uptime: process.uptime(),
     timestamp: Date.now(),
-    env: proccess.env.NODE_ENV || "development",
+    env: process.env.NODE_ENV || "development",
   });
 });
 //handling 404 (route not found).
