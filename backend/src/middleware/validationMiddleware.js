@@ -2,8 +2,10 @@ import { body, param, validationResult } from "express-validator";
 import { UserDBService } from "../services/database/userDBService.js";
 const userDBService = new UserDBService();
 export const validateCreateWorkflow = [
-  body("description").isString().notEmpty(),
-  body("n8nApiKey").isString().notEmpty(),
+  body("description")
+    .isString()
+    .notEmpty()
+    .withMessage("description is required"),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

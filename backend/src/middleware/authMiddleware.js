@@ -1,9 +1,8 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import { PrismaClient } from "@prisma/client";
+import prisma from "../lib/prisma.js";
 
 dotenv.config();
-const prisma = new PrismaClient();
 
 export async function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;

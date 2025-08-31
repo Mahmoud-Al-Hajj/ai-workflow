@@ -1,21 +1,26 @@
-// Import what you need
-
 import { workflowService } from "../services/workflowService.js";
+import { decrypt } from "../utils/crypto.js";
 
-// Create the class
 export class WorkflowController {
   constructor() {
     this.workflowService = workflowService;
   }
 
   async createCompleteWorkflow(req, res) {
-    const { description, userId, n8nUrl, n8nApiKey } = req.body;
+    const { description } = req.body;
+    const userId = req.user?.id;
+    const n8nUrl = req.user?.n8nUrl;
+    const n8nApiKey = req.user?.n8nApiKey;
+    let decryptedN8nKey = null;
+    if (n8nApiKey) {
+      decryptedN8nKey = decrypt(n8nApiKey);
+    }
     try {
       const result = await this.workflowService.createCompleteWorkflow({
         description,
         userId,
         n8nUrl,
-        n8nApiKey,
+        n8nApiKey: decryptedN8nKey,
       });
       res.status(201).json({
         success: true,
@@ -67,7 +72,8 @@ export class WorkflowController {
   }
 
   async getWorkflowsForUser(req, res) {
-    const userId = req.params.userId;
+    // return workflows for the authenticated user only
+    const userId = req.user?.id;
     try {
       const workflows = await this.workflowService.getWorkflowsForUser(userId);
       res.json({

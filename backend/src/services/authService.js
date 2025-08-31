@@ -1,6 +1,7 @@
 import prisma from "../lib/prisma.js";
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils/jwt.js";
+import { encrypt } from "../utils/crypto.js";
 
 class AuthService {
   async login(email, password) {
@@ -15,13 +16,19 @@ class AuthService {
   }
   async register({ name, email, password, n8nUrl, n8nApiKey }) {
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    let encryptedKey = null;
+    if (n8nApiKey) {
+      encryptedKey = encrypt(n8nApiKey);
+    }
+
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
         n8nUrl,
-        n8nApiKey,
+        n8nApiKey: encryptedKey,
       },
     });
 
