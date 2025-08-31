@@ -7,10 +7,15 @@ export class WorkflowController {
   }
 
   async createCompleteWorkflow(req, res) {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ success: false, error: "Unauthenticated" });
+    }
+
     const { description } = req.body;
     const userId = req.user?.id;
     const n8nUrl = req.user?.n8nUrl;
     const n8nApiKey = req.user?.n8nApiKey;
+
     let decryptedN8nKey = null;
     if (n8nApiKey) {
       decryptedN8nKey = decrypt(n8nApiKey);
