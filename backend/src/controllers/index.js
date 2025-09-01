@@ -10,8 +10,7 @@ const N8N_URL = process.env.N8N_URL;
 
 async function main() {
   const englishInput =
-    "Every Monday at 9 AM, pull new leads from Airtable, clean the data with OpenAI, then save it in Google Sheets. At the same time, send a summary email to the sales team and a Slack notification to the marketing channel.";
-
+    "When a user submits a journal entry, analyze the text with AI to detect mood and themes, save the results in a database, call an ML model to predict future mood, generate personalized tips, schedule routines in Google Calendar, and send the user daily or weekly summaries via email or Slack.";
   const userJson = await getUserJsonFromEnglish(englishInput);
 
   await deployWorkflow(userJson, API_KEY, N8N_URL);

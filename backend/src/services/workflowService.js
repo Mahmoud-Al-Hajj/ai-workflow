@@ -2,6 +2,7 @@ import { getAllNodeTemplates } from "./catalogService.js";
 import { getUserJsonFromEnglish } from "./aiService.js";
 import { WorkflowDatabaseService } from "./database/workflowDBService.js";
 import { deployWorkflow } from "./deploymentService.js";
+import dagre from "dagre";
 
 export class WorkflowService {
   constructor() {
@@ -21,14 +22,13 @@ export class WorkflowService {
       );
 
       const n8nWorkflow = this.buildWorkflow(aiWorkflowJson);
-      console.log(n8nWorkflow);
+      console.log(JSON.stringify(n8nWorkflow, null, 2));
       // Step 4: Save to database
       const savedWorkflow = await this.workflowDBService.createWorkflow({
         name: description.substring(0, 50) + "...",
         data: n8nWorkflow,
         userId: Number(userId), //la et2akad enu keef ma nb3tt rej3a integer
       });
-      //this is a test
 
       return {
         databaseWorkflow: savedWorkflow,
@@ -46,14 +46,10 @@ export class WorkflowService {
       name: "AI Generated Workflow",
       nodes: [],
       connections: {},
-      settings: {
-        saveExecutionProgress: true,
-      },
+      settings: { saveExecutionProgress: true },
     };
 
     let nodeId = 1;
-    let sequentialCount = 0;
-    let parallelCount = 0;
     let prevNodeName = "Trigger";
 
     // Add trigger node
@@ -62,52 +58,50 @@ export class WorkflowService {
         id: nodeId,
         name: "Trigger",
         type: this.getTriggerNodeType(userJson.trigger),
-        typeVersion: 1,
-        position: [200, 300],
+        position: [0, 0], // Initial position, will be updated by dagre
         parameters: userJson.triggerParams || {},
       })
     );
-
     nodeId++;
 
+    let currentIfNode = null;
     for (const actionObj of userJson.actions) {
       const nodeType = this.getActionNodeType(actionObj.action);
-
-      const nodePosition = this.getNodePosition(
-        actionObj.mode,
-        sequentialCount,
-        parallelCount
-      );
-
       workflow.nodes.push(
         this.createNode({
           id: nodeId,
           name: actionObj.action,
           type: nodeType,
-          typeVersion: 1,
-          position: nodePosition,
+          position: [0, 0], // Initial position
           parameters: actionObj.params || {},
         })
       );
 
-      let fromNode;
-      if (actionObj.mode === "sequential") {
+      let fromNode = null;
+      if (actionObj.action.startsWith("if.")) {
+        currentIfNode = actionObj.action;
         fromNode = prevNodeName;
-      } else {
+      } else if (actionObj.mode === "branch_true" && currentIfNode) {
+        this.addConnection(workflow, currentIfNode, actionObj.action, 0, 0);
+      } else if (actionObj.mode === "branch_false" && currentIfNode) {
+        this.addConnection(workflow, currentIfNode, actionObj.action, 1, 0);
+      } else if (actionObj.mode === "sequential") {
+        fromNode = prevNodeName;
+      } else if (actionObj.mode === "parallel") {
         fromNode = "Trigger";
       }
 
-      this.addConnection(workflow, fromNode, actionObj.action);
+      if (fromNode) this.addConnection(workflow, fromNode, actionObj.action);
 
       if (actionObj.mode === "sequential") {
         prevNodeName = actionObj.action;
-        sequentialCount++;
-      } else {
-        parallelCount++;
       }
 
       nodeId++;
     }
+
+    // Use dagre for automatic layout
+    this.applyDagreLayout(workflow);
 
     return workflow;
   }
@@ -123,22 +117,17 @@ export class WorkflowService {
     };
   }
 
-  getNodePosition(mode, sequentialCount, parallelCount) {
-    if (mode === "sequential") {
-      return [400 + sequentialCount * 200, 200];
-    } else {
-      return [400, 50 + parallelCount * 370];
-    }
-  }
-
-  addConnection(workflow, fromNode, toNode) {
+  addConnection(workflow, fromNode, toNode, outputIndex = 0, inputIndex = 0) {
     if (!workflow.connections[fromNode]) {
       workflow.connections[fromNode] = { main: [[]] };
     }
-    workflow.connections[fromNode].main[0].push({
+    if (!workflow.connections[fromNode].main[outputIndex]) {
+      workflow.connections[fromNode].main[outputIndex] = [];
+    }
+    workflow.connections[fromNode].main[outputIndex].push({
       node: toNode,
       type: "main",
-      index: 0,
+      index: inputIndex,
     });
   }
 
@@ -164,6 +153,16 @@ export class WorkflowService {
     // Extract service name (everything before first dot)
     const serviceName = action.split(".")[0].toLowerCase();
 
+    if (action.startsWith("if.")) {
+      return "n8n-nodes-base.if";
+    }
+    // if (action.startsWith("function.")) {
+    //   return "n8n-nodes-base.function";
+    // }
+    // if (action.startsWith("merge.")) {
+    //   return "n8n-nodes-base.merge";
+    // }
+
     // Use the dynamic node catalog directly
     return this.nodeCatalog[serviceName] || "n8n-nodes-base.set";
   }
@@ -182,6 +181,54 @@ export class WorkflowService {
 
   async deleteWorkflow(id) {
     return await this.workflowDBService.deleteWorkflow(id);
+  }
+
+  // Positioning methods
+  applyDagreLayout(workflow) {
+    const spacingX = 300;
+    const spacingY = 200;
+
+    // Build adjacency map
+    const adjacency = {};
+    Object.entries(workflow.connections).forEach(([fromNode, conn]) => {
+      conn.main?.forEach((outputs) => {
+        outputs.forEach((output) => {
+          if (!adjacency[fromNode]) adjacency[fromNode] = [];
+          adjacency[fromNode].push(output.node);
+        });
+      });
+    });
+
+    const positions = {};
+    const visited = new Set();
+
+    const placeNode = (node, depth, offsetY) => {
+      if (visited.has(node)) return;
+      visited.add(node);
+
+      positions[node] = [depth * spacingX, offsetY];
+
+      const children = adjacency[node] || [];
+      if (children.length === 1) {
+        placeNode(children[0], depth + 1, offsetY);
+      } else if (children.length > 1) {
+        // Spread branches vertically
+        const branchStartY = offsetY - ((children.length - 1) * spacingY) / 2;
+        children.forEach((child, i) =>
+          placeNode(child, depth + 1, branchStartY + i * spacingY)
+        );
+      }
+    };
+
+    // Start layout from Trigger
+    placeNode("Trigger", 0, 0);
+
+    // Apply positions to workflow
+    workflow.nodes.forEach((node) => {
+      if (positions[node.name]) {
+        node.position = positions[node.name];
+      }
+    });
   }
 }
 

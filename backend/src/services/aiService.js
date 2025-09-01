@@ -60,9 +60,35 @@ You are an expert AI that converts any natural language workflow description int
   - "Zapier" → "webhook"
   - "Database" → "postgres" or "mysql"
   - "HTTP Request" → "httprequest"
+  - "Webhook" → "webhook"
+  - "Schedule/Cron" → "schedule"
+  - "Function/Code" → "function"
+  - "Google Calendar" → "googlecalendar"
+  - "Email Send" → "gmail"
+  - "ML/AI Model" → "httprequest" (for external APIs)
+  - "Data Storage" → "postgres", "mysql", or "airtable" choose one if not specified
 
 - For triggers, use format: "servicename.trigger" (e.g., "airtable.trigger", "gmail.trigger")
 - For actions, use format: "servicename.action" (e.g., "gmail.send_email", "whatsapp.send_message")
+- Advanced Node Types:
+  * IF/Switch Nodes: Use "if.condition" for conditional branching (e.g., "if.status_active", "if.user_verified")
+  * Function Nodes: Use "function.custom" for JavaScript processing (e.g., "function.transform_data", "function.validate_input")
+  * Merge Nodes: Use "merge.combine" for combining multiple inputs (e.g., "merge.join_branches", "merge.aggregate_results")
+  * Delay Nodes: Use "delay.wait" for timing controls (e.g., "delay.5_minutes", "delay.2_hours")
+  * Branching: Actions after IF conditions use "branch_true" or "branch_false"
+  
+ - Branching Guidelines:
+  * When user says "if X then Y else Z":
+    1. Create IF node with condition in params
+    2. Set Y action to "branch_true" 
+    3. Set Z action to "branch_false"
+  * IF nodes always use "sequential" mode (connected to main flow)
+  * Branch actions are positioned parallel to each other but connected to IF outputs
+  * UNIQUE NAMING: Branch actions MUST have unique action names to avoid conflicts
+    - Use descriptive names like "gmail.send_premium_welcome" and "gmail.send_basic_welcome"
+    - Never use identical action names for different branches
+    - Base names on the action's purpose or target (e.g., recipient, content type)
+ 
 
 - Parameter Requirements:
   * Email addresses: Must be valid format (user@domain.com)
@@ -76,6 +102,19 @@ You are an expert AI that converts any natural language workflow description int
   * Never use: "{{placeholder}}", "<insert_value>", "YOUR_EMAIL"
   * Never use empty objects: {}
   * Never use null or undefined values
+
+- JavaScript Code Guidelines for Function Nodes:
+  * Use n8n's JavaScript syntax with variables like $input, $json, $node
+  * $input: The input data from the previous node
+  * $json: The JSON data from the current or previous nodes
+  * $node: Access data from specific nodes by name
+  * Always return the transformed data or the result
+  * Use standard JavaScript: arrays, objects, loops, conditionals
+  * Examples:
+    - Calculate sum: "return $input.items.reduce((sum, item) => sum + item.price * item.quantity, 0);"
+    - Transform data: "return { ...$input, newField: $input.oldField * 2 };"
+    - Conditional logic: "if ($input.status === 'active') { return { ...$input, processed: true }; } else { return $input; }"
+  * Ensure code is valid JavaScript and handles errors gracefully
 
 - Advanced Patterns:
   * Conditional Logic: If user mentions "if/when X happens", add conditions in params
@@ -104,6 +143,11 @@ You are an expert AI that converts any natural language workflow description int
 - **Trigger Identification**: Detect the main event or condition (e.g., "new GitHub issue", "every Monday at 9PM") and map it to a canonical trigger key (e.g., "github.new_issue", "schedule.every_monday_21:00").
 - **Parameter Extraction**: Parse contextual details into structured fields.
 - Example: "Send email to test@example.com" → { "to": "test@example.com" }.
+
+- Parameter Guidelines:
+  * Fill ALL required fields with realistic values (e.g., emails like "user@example.com", URLs with https://).
+  * Use n8n variables like {{$json.field}} for data flow; avoid placeholders like "{{placeholder}}" or empty objects {}.
+  * For APIs, include essentials like "prompt" for OpenAI or "to/subject/message" for Gmail.
 
 MANDATORY: If the input mentions timing, cadence, dates, conditions, or schedule (e.g., “every Monday at 9PM”, “daily at 7:30”, “on 2024-12-01”, “if status is paid”), you MUST:
 Use 24h time ("21:00"), ISO dates ("2024-01-01"), and include "timezone" when given.
@@ -143,7 +187,101 @@ Output: { "trigger": "webhook.new_lead", "actions": [ { "action": "gmail.send_em
 
 Input: First send email, then wait 5 minutes, then post to Slack
 Output: { "trigger": "webhook.start", "actions": [ { "action": "gmail.send_email", "params": { "to": "user@example.com", "subject": "Process Started", "message": "Workflow has begun." }, "mode": "sequential" }, { "action": "delay.wait", "params": { "duration": "5m" }, "mode": "sequential" }, { "action": "slack.post_message", "params": { "channel": "#updates", "message": "Process completed after delay." }, "mode": "sequential" } ] }
+Input: If the user's status is premium, send a welcome email to premium@example.com, otherwise send a basic email to basic@example.com
+Output: {
+  "trigger": "webhook.new_user",
+  "actions": [
+    {
+      "action": "if.check_premium",
+      "params": {
+        "rules": [
+          {
+            "condition": "equals",
+            "value1": "{{$json.status}}",
+            "value2": "premium"
+          }
+        ]
+      },
+      "mode": "sequential"
+    },
+    {
+      "action": "gmail.send_premium_welcome",
+      "params": {
+        "to": "premium@example.com",
+        "subject": "Welcome Premium User!",
+        "message": "Welcome to the premium service!"
+      },
+      "mode": "branch_true"
+    },
+    {
+      "action": "gmail.send_basic_welcome",
+      "params": {
+        "to": "basic@example.com",
+        "subject": "Welcome Basic User!",
+        "message": "Welcome to the basic service!"
+      },
+      "mode": "branch_false"
+    }
+  ]
+}
 
+Input: Process order data, if total > $100 apply discount, then send confirmation and update inventory
+Output: {
+  "trigger": "webhook.new_order",
+  "actions": [
+    {
+      "action": "function.calculate_total",
+      "params": { "functionCode": "return $input.items.reduce((sum, item) => sum + item.price * item.quantity, 0);" },
+      "mode": "sequential"
+    },
+    {
+      "action": "if.check_high_value",
+      "params": { "rules": [{ "condition": "number", "operation": "larger", "value1": "{{$node[\"Function\"].json.total}}", "value2": 100 }] },
+      "mode": "sequential"
+    },
+    {
+      "action": "function.apply_discount",
+      "params": { "functionCode": "return { ...$input, discount: 0.1, finalTotal: $input.total * 0.9 };" },
+      "mode": "branch_true"
+    },
+    {
+      "action": "gmail.send_confirmation",
+      "params": { "to": "{{$json.customerEmail}}", "subject": "Order Confirmation", "message": "Your order total: {{ $json.finalTotal || $json.total }} },
+      "mode": "sequential"
+    },
+    {
+      "action": "airtable.update_inventory",
+      "params": { "table": "inventory", "fields": { "status": "sold", "orderId": "{{$json.orderId}}" } },
+      "mode": "parallel"
+    }
+  ]
+}
+
+Input: Use OpenAI to summarize incoming webhook data and send the summary via email
+Output: {
+  "trigger": "webhook.received",
+  "actions": [
+    {
+      "action": "openai.generate_text",
+      "params": {
+        "prompt": "Summarize the following data: {{$json.webhookData}}",
+        "model": "gpt-3.5-turbo",
+        "temperature": 0.7,
+        "maxTokens": 150
+      },
+      "mode": "sequential"
+    },
+    {
+      "action": "gmail.send_email",
+      "params": {
+        "to": "user@example.com",
+        "subject": "Data Summary",
+        "message": "Summary: {{$node[\"OpenAI\"].json.output}}"
+      },
+      "mode": "sequential"
+    }
+  ]
+}
 `;
 
   const body = {
@@ -151,7 +289,7 @@ Output: { "trigger": "webhook.start", "actions": [ { "action": "gmail.send_email
     contents: [{ role: "user", parts: [{ text: description }] }],
     generationConfig: {
       temperature: 0,
-      maxOutputTokens: 500,
+      maxOutputTokens: 4096,
       responseMimeType: "application/json",
     },
   };
