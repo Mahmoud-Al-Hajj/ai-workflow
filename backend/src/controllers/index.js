@@ -10,7 +10,7 @@ const N8N_URL = process.env.N8N_URL;
 
 async function main() {
   const englishInput =
-    "When a user submits a journal entry, analyze the text with AI to detect mood and themes, save the results in a database, call an ML model to predict future mood, generate personalized tips, schedule routines in Google Calendar, and send the user daily or weekly summaries via email or Slack.";
+    "If the lead score is excellent, send immediate personalized email, SMS notification, and create a high-priority task for the sales team. If the lead score is good, send email only and add to nurture campaign. If the lead score is poor, add to general newsletter and log for review. For all leads, update the CRM record regardless of score.";
   const userJson = await getUserJsonFromEnglish(englishInput);
 
   await deployWorkflow(userJson, API_KEY, N8N_URL);
