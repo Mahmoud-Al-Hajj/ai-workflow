@@ -4,14 +4,23 @@ import {
   validateRegister,
   validateLogin,
 } from "../middleware/validationMiddleware.js";
+import {
+  authMiddleware,
+  adminMiddleware,
+} from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 const userController = new UserController();
 
-router.get("/users", (req, res) => userController.getAllUsers(req, res));
+router.get("/users", adminMiddleware, (req, res) =>
+  userController.getAllUsers(req, res)
+);
 router.get("/users/:id", (req, res) => userController.getUserById(req, res));
 router.put("/users/:id", (req, res) => userController.updateUser(req, res));
-router.delete("/users/:id", (req, res) => userController.deleteUser(req, res));
+
+router.delete("/users/:id", adminMiddleware, (req, res) =>
+  userController.deleteUser(req, res)
+);
 
 router.post("/auth/login", validateLogin, (req, res) =>
   userController.login(req, res)

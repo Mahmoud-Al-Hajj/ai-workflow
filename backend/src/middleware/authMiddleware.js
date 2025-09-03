@@ -22,3 +22,10 @@ export async function authMiddleware(req, res, next) {
     res.status(401).json({ error: "Unauthorized" });
   }
 }
+
+export async function adminMiddleware(req, res, next) {
+  if (req.user.email !== "mah06.hajj@gmail.com") {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+  next();
+}
