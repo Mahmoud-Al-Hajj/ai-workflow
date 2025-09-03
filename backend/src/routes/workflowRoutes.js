@@ -1,6 +1,9 @@
 import express from "express";
 import { WorkflowController } from "../controllers/WorkflowController.js";
-import { authMiddleware } from "../middleware/authMiddleware.js";
+import {
+  authMiddleware,
+  adminMiddleware,
+} from "../middleware/authMiddleware.js";
 import {
   validateCreateWorkflow,
   validateIdParam,
@@ -9,7 +12,7 @@ import {
 const router = express.Router();
 const workflowController = new WorkflowController();
 
-router.get("/workflows", authMiddleware, (req, res) =>
+router.get("/workflows", adminMiddleware, authMiddleware, (req, res) =>
   workflowController.getAllWorkflows(req, res)
 );
 router.get("/workflows/user/:userId", authMiddleware, (req, res) =>
@@ -21,8 +24,12 @@ router.get("/workflows/:id", validateIdParam, authMiddleware, (req, res) =>
 router.post("/workflows", validateCreateWorkflow, authMiddleware, (req, res) =>
   workflowController.createCompleteWorkflow(req, res)
 );
-router.delete("/workflows/:id", validateIdParam, authMiddleware, (req, res) =>
-  workflowController.deleteWorkflow(req, res)
+router.delete(
+  "/workflows/:id",
+  adminMiddleware,
+  validateIdParam,
+  authMiddleware,
+  (req, res) => workflowController.deleteWorkflow(req, res)
 );
 
 export default router;
