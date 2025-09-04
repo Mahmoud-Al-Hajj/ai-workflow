@@ -1,0 +1,469 @@
+{
+  "name": "RemotelyX",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "sender": "test1ing091@gmail.com"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -224,
+        336
+      ],
+      "id": "609515e3-7622-407f-955c-ba8a348a776e",
+      "name": "Gmail Trigger",
+      "alwaysOutputData": false,
+      "retryOnFail": true,
+      "maxTries": 2,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dv30AQSPS55VlQQf",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Combine all possible fields that might contain the URL\nconst body = ($json.snippet || '') + '\\n' + ($json.text || '') + '\\n' + ($json.html || '');\n\n// Extract Gamma URL\nconst match = body.match(/(https:\\/\\/gamma\\.app\\/docs\\/[^\\s<>\"')\\]]+)/gi);\nlet jobUrl = match ? match[0] : null;\nif (jobUrl) jobUrl = jobUrl.replace(/[)\\].,;!?]+$/, '');\n\n// Extract \"from\" email address\nlet fromEmail = '';\nif ($json.from && $json.from.value && $json.from.value.length > 0) {\n    fromEmail = $json.from.value[0].address || '';\n}\n\n// Extract \"to\" email address\nlet toEmail = '';\nif ($json.to && $json.to.value && $json.to.value.length > 0) {\n    toEmail = $json.to.value[0].address || '';\n}\n\n// Return structured object\nreturn [{\n    json: {\n        job_url: jobUrl,\n        subject: $json.Subject || '',\n        from: $json.From || '',\n        to: $json.To || ''\n    }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        336
+      ],
+      "id": "f2673621-86da-4ef6-9efa-ffd9195e23f5",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Function node (NOT Function Item)\n// Expects items[0].json.rawText to contain the whole job post as one big string.\n// Returns a single item with structured fields + bullet arrays.\n\nfunction getText(item) {\n  // Preferred: rawText\n  if (item.json && typeof item.json.rawText === 'string' && item.json.rawText.trim()) return item.json.rawText;\n\n  // Fallbacks (optional): if you ever feed a parsed Gamma export, this will still work.\n  if (Array.isArray(item.json?.content)) return item.json.content.join('\\n');\n  try {\n    const s = item.json?.stdout || item.json?.body || '';\n    if (typeof s === 'string' && s.trim()) {\n      const parsed = JSON.parse(s);\n      if (Array.isArray(parsed?.content)) return parsed.content.join('\\n');\n      if (typeof parsed?.content === 'string') return parsed.content;\n    }\n  } catch (e) {}\n\n  // Last resort\n  return typeof item.json === 'string' ? item.json : JSON.stringify(item.json ?? {});\n}\n\nconst item = items[0] || { json: {} };\nlet text = getText(item);\n\n// Normalize whitespace\ntext = String(text || '').replace(/\\r\\n/g, '\\n');\n\n// Section headers we care about\nconst HEADERS = ['Company Overview','Key Responsibilities','Qualifications','Position Description'];\n\n// Sentinels to help find the end of a section in messy/repeated documents\nconst SENTINELS = [\n  'Made with',\n  'Technical Backend Specialist',\n  'Company Overview',\n  'Key Responsibilities',\n  'Qualifications',\n  'Position Description'\n];\n\n// Escape for regex\nconst esc = (s) => s.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n\n// Find all candidate slices for a header, then pick the best by a content score\nfunction candidatesFor(header) {\n  const re = new RegExp(esc(header), 'gi');\n  let m;\n  const starts = [];\n  while ((m = re.exec(text)) !== null) starts.push(m.index);\n\n  const cands = [];\n  for (const s of starts) {\n    let end = text.length;\n    for (const h of [...HEADERS, ...SENTINELS]) {\n      const re2 = new RegExp(esc(h), 'gi');\n      const chunk = text.slice(s + header.length);\n      const m2 = re2.exec(chunk);\n      if (m2) {\n        const idx = s + header.length + m2.index;\n        if (idx > s && idx < end) end = idx;\n      }\n    }\n    const slice = text.slice(s + header.length, end).trim();\n    if (slice) cands.push(slice);\n  }\n  return cands;\n}\n\nfunction scoreSection(s) {\n  // Reward actual content: alphanumerics + number of non-trivial lines\n  const alnum = (s.match(/[A-Za-z0-9]/g) || []).length;\n  const longLines = s.split('\\n').filter(l => l.trim().length > 10).length;\n  return alnum + longLines * 50;\n}\n\nfunction pickBest(header) {\n  const cands = candidatesFor(header);\n  if (!cands.length) return '';\n  cands.sort((a, b) => scoreSection(b) - scoreSection(a));\n  return cands[0];\n}\n\n// Remove duplicate lines, headings, and noise\nfunction dedupeLines(s) {\n  const skip = new Set(['expand','company overview','key responsibilities','qualifications','position description','made with']);\n  const seen = new Set();\n  const out = [];\n  for (const raw of String(s || '').split('\\n')) {\n    const l = raw.trim();\n    if (!l) continue;\n    if (skip.has(l.toLowerCase())) continue;\n    const key = l.toLowerCase();\n    if (seen.has(key)) continue;\n    seen.add(key);\n    out.push(l);\n  }\n  return out.join('\\n').trim();\n}\n\n// Turn a text block into bullet points\nfunction bulletsFrom(s) {\n  const lines = String(s || '').split('\\n').map(l => l.trim()).filter(Boolean);\n  const bullets = [];\n  for (let l of lines) {\n    l = l.replace(/\\s{2,}/g, ' ');\n    // Split where a new bullet likely starts (dash, dot, or emoji bullets)\n    const parts = l.split(/(?=(?:^|[\\s])(?:[-•●▪︎▪•]|[✅🧩🔧⚙️🧠📡💡]))/g)\n                   .map(p => p.trim())\n                   .filter(Boolean);\n    for (let p of parts) {\n      p = p.replace(/^[\\-\\u2022\\u2023\\u25CF\\u25E6\\u2043✅🧩🔧⚙️🧠📡💡\\s]+/, '').trim();\n      if (p) bullets.push(p);\n    }\n  }\n  // Unique bullets, preserve order\n  const seen = new Set();\n  const uniq = [];\n  for (const b of bullets) {\n    const k = b.toLowerCase();\n    if (seen.has(k)) continue;\n    seen.add(k);\n    uniq.push(b);\n  }\n  return uniq;\n}\n\n// Extract sections\nconst titleMatch = text.match(/Technical Backend Specialist[^\\n]*/i);\nconst title = titleMatch ? titleMatch[0].trim() : 'Technical Backend Specialist';\n\nlet company_overview = dedupeLines(pickBest('Company Overview'));\nlet key_responsibilities = dedupeLines(pickBest('Key Responsibilities'));\nlet qualifications = dedupeLines(pickBest('Qualifications'));\nlet position_description = dedupeLines(pickBest('Position Description'));\n\n// Derive bullets\nconst responsibilities_list = bulletsFrom(key_responsibilities);\nconst qualifications_list = bulletsFrom(qualifications);\nconst position_notes = bulletsFrom(position_description);\n\n// Optional: quick facts\nconst compensation = (text.match(/Compensation:\\s*\\$?[\\d,]+(?:\\s*-\\s*\\$?[\\d,]+)?/i) || [''])[0]\n  .replace(/Compensation:\\s*/i, '') || null;\nconst work_hours = (text.match(/work (?:between|from)\\s*[^.\\n]+/i) || [''])[0] || null;\nconst location = (text.match(/\\bLeb(?:anon)?\\b|\\bBeirut\\b/i) || [''])[0] || null;\nlet job_url = null;\n\ntry {\n  const parsed = JSON.parse(item.json.stdout || '{}');\n  job_url = parsed.url || null;\n} catch (e) {\n  job_url = null;\n}\n\n\nreturn [\n  {\n    json: {\n      title,\n      job_url,\n      company_overview,\n      key_responsibilities,\n      qualifications,\n      position_description,\n      responsibilities_list,\n      qualifications_list,\n      position_notes,\n      compensation,\n      work_hours,\n      location\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        336
+      ],
+      "id": "3d30ad90-8b80-43ad-94d2-2c24f8748d4d",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "command": "=node \"C:\\Users\\user\\Desktop\\RemotelyX Dashboard\\scrapeGamma.js\" {{ $('Code').item.json.job_url }} "
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        672,
+        336
+      ],
+      "id": "be77dd93-3858-4061-a793-8d0bef01c67a",
+      "name": "Execute Command1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a job posting parser. \nExtract the following information from the text and return it strictly as JSON:\n\n1. **skills**: Extract ALL technical skills, programming languages, frameworks, libraries, databases, and tools mentioned in this text. \n2. **seniority**: Classify the role as exactly one of: \"Jr\", \"Mid\", or \"Sr\".\n   - Use \"Jr\" for entry-level, internship, or <2 years experience.\n   - Use \"Mid\" for 2–5 years or if unspecified.\n   - Use \"Sr\" for senior, lead, principal, architect, or >5 years experience.\n3. **work_mode**: Classify as exactly one of: \"Remote\", \"Hybrid\", or \"Onsite\".\n   - Look for words like remote, hybrid, work from anywhere, onsite, office-based, etc.\n4. **salary**: Parse salary range if mentioned. \n   Return as an object with \"min\" and \"max\" numbers in USD. \n   If only one number is given, set both min and max to that value. \n   If not found, return null.\n5. title return the title as title: \"\"\n6. job url return the job url as job_url: \"\"\n7. description is the company overiveiw, return the overview as description: \"\"\n\nReturn JSON in this format:\n\n{\n  \"title\": \"\" ,\n  \"job_url\": \"\",\n  \"description\":\"\",\n  \"skills\": [...],\n  \"seniority\": \"Mid\",\n  \"work_mode\": \"Remote\",\n  \"salary\": { \"min\": 2000, \"max\": 2500 }\n}\nText:\n{{ $json.qualifications }} {{ $json.key_responsibilities }}\n{{ $json.compensation}} {{ $json.position_notes }} {{ $json.qualifications_list }} {{ $json.title }} {{ $json.job_url }}{{ $json.company_overview }}\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        1120,
+        336
+      ],
+      "id": "250aab9a-b9a9-4f25-b584-0fbcfde4527f",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        560
+      ],
+      "id": "4a661a79-f908-44b0-88a2-f824c7919d99",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "cjWj1aqvYeVE5tYV",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => { \n    // Remove ```json ... ``` if present\n    let raw = item.json.text;\n    raw = raw.replace(/```json\\s*|\\s*```/g, '');\n    \n    let data;\n    try {\n        data = JSON.parse(raw);\n    } catch (err) {\n        data = { error: \"Failed to parse JSON\" };\n    }\n\n    // Convert skills into array\n    let skillsArray = [];\n    if (Array.isArray(data.skills)) {\n        skillsArray = data.skills.map(skill => skill.trim());\n    } else if (typeof data.skills === \"string\") {\n        skillsArray = data.skills.split(\",\").map(skill => skill.trim());\n    }\n\n    // Flatten for Excel\n    return {\n        json: {\n            title: data.title || \"\",\n            job_url: data.job_url || \"\",\n            description: data.description || \"\",\n            skills: skillsArray,\n            seniority: data.seniority || \"\",\n            work_mode: data.work_mode || \"\",\n            salary_min: data.salary?.min || \"\",\n            salary_max: data.salary?.max || \"\"\n        }\n    };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1472,
+        336
+      ],
+      "id": "f2591c03-bb50-468c-a79d-e2761f66db6e",
+      "name": "Code3"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1HfTRkRwuZ7cd3816WQBHbkHRWoJtiOpzdG9Ld4130bc",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HfTRkRwuZ7cd3816WQBHbkHRWoJtiOpzdG9Ld4130bc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HfTRkRwuZ7cd3816WQBHbkHRWoJtiOpzdG9Ld4130bc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "skills",
+              "displayName": "skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "seniority",
+              "displayName": "seniority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "work_mode",
+              "displayName": "work_mode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "salary_min",
+              "displayName": "salary_min",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "salary_max",
+              "displayName": "salary_max",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "handlingExtraData": "ignoreIt"
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1696,
+        240
+      ],
+      "id": "2cc10001-e0de-48aa-9a84-9e8ee2e4b4ca",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "W0DbSaLM2ZyTw9iW",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1HfTRkRwuZ7cd3816WQBHbkHRWoJtiOpzdG9Ld4130bc",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HfTRkRwuZ7cd3816WQBHbkHRWoJtiOpzdG9Ld4130bc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1HfTRkRwuZ7cd3816WQBHbkHRWoJtiOpzdG9Ld4130bc/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "job_url",
+              "lookupValue": "={{ $json.job_url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        336
+      ],
+      "id": "d67f106a-61ef-49bd-9df7-24e21e9b4b8b",
+      "name": "Get row(s) in sheet1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "W0DbSaLM2ZyTw9iW",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "80830100-8404-4c8b-a184-54f60be31164",
+              "leftValue": "={{ $json.job_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        336
+      ],
+      "id": "6586102a-8485-4150-8083-2129bdca58bf",
+      "name": "If",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n    // If your AI node outputs a string in item.json.text, parse it\n    let data = {};\n    if (typeof item.json.text === 'string') {\n        try {\n            data = JSON.parse(item.json.text);\n        } catch (err) {\n            // fallback: keep raw text as description\n            data = { description: item.json.text };\n        }\n    } else {\n        // Already an object\n        data = item.json;\n    }\n\n    // Ensure skills is always an array\n    if (data.skills) {\n        if (typeof data.skills === 'string') {\n            data.skills = data.skills.split(',').map(s => s.trim());\n        } else if (!Array.isArray(data.skills)) {\n            data.skills = [];\n        }\n    } else {\n        data.skills = [];\n    }\n\n    return {\n        json: {\n            title: data.title || \"\",\n            job_url: data.job_url || \"\",\n            description: data.description || \"\",\n            skills: data.skills,\n            seniority: data.seniority || \"\",\n            work_mode: data.work_mode || \"\",\n            salary_min: data.salary_min || \"\",\n            salary_max: data.salary_max || \"\"\n        }\n    };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1696,
+        432
+      ],
+      "id": "10d43693-3fbd-4874-81bf-590fe23df23f",
+      "name": "Clean"
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "collection": "job_postings",
+        "fields": "={\n  title: {{$json.title}},\n  job_url: {{$json.job_url}},\n  description: {{$json.description}},\n  skills: {{$json.skills}},\n  seniority: {{$json.seniority}},\n  work_mode: {{$json.work_mode}},\n  salary_min: {{$json.salary_min}},\n  salary_max: {{$json.salary_max}}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.2,
+      "position": [
+        1920,
+        432
+      ],
+      "id": "b4504867-db68-449b-b073-30f70e238b37",
+      "name": "Insert documents",
+      "credentials": {
+        "mongoDb": {
+          "id": "HC4xfjft8yM4NDNY",
+          "name": "MongoDB account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Clean",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Execute Command1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean": {
+      "main": [
+        [
+          {
+            "node": "Insert documents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ed45dd26-0ab4-45d4-8280-845bdabd7b6d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7ec77c784a6cb0f520f3a42da7a363d0b047f16ec0d86df5c86fdab9a7069e6f"
+  },
+  "id": "XIwrIPzCApitrJh6",
+  "tags": []
+}

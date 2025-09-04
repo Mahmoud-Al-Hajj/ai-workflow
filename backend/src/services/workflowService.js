@@ -115,11 +115,13 @@ export class WorkflowService {
   }
 
   createNode({ id, name, type, position, parameters }) {
+    const typeVersion = type === "n8n-nodes-base.if" ? 2.2 : 1;
+
     return {
       id: `${id}`,
       name,
       type,
-      typeVersion: 1,
+      typeVersion,
       position,
       parameters,
     };
