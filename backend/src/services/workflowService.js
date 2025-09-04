@@ -79,8 +79,16 @@ export class WorkflowService {
 
       let fromNode = null;
       if (actionObj.action.startsWith("if.")) {
-        currentIfNode = actionObj.action;
-        fromNode = prevNodeName;
+        // Special handling for IF nodes on false branches
+        if (actionObj.mode === "branch_false" && currentIfNode) {
+          // Connect this IF to the previous IF's false output
+          this.addConnection(workflow, currentIfNode, actionObj.action, 1, 0);
+        } else if (actionObj.mode === "sequential") {
+          fromNode = prevNodeName;
+        } else if (actionObj.mode === "parallel") {
+          fromNode = "Trigger";
+        }
+        currentIfNode = actionObj.action; // Set as current IF for subsequent branches
       } else if (actionObj.mode === "branch_true" && currentIfNode) {
         this.addConnection(workflow, currentIfNode, actionObj.action, 0, 0);
       } else if (actionObj.mode === "branch_false" && currentIfNode) {

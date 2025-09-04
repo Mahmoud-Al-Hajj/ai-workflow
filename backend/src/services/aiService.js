@@ -76,18 +76,21 @@ You are an expert AI that converts any natural language workflow description int
   * Branching: Actions after IF conditions use "branch_true" or "branch_false"
   
  - Branching Guidelines:
-  * When user says "if X then Y else Z":
-    1. Create IF node with condition in params
-    2. Set Y action to "branch_true"
-    3. Set Z action to "branch_false"
-  * IF nodes always use "sequential" mode (connected to main flow)
-  * Branch actions are positioned parallel to each other but connected to IF outputs
-  * UNIQUE NAMING: Branch actions MUST have unique action names to avoid conflicts
-    - Use descriptive names like "gmail.send_premium_welcome" and "gmail.send_basic_welcome"
-    - Never use identical action names for different branches
-    - Base names on the action's purpose or target (e.g., recipient, content type)
- 
+  * For simple if-else: Create ONE IF node, use "branch_true" and "branch_false" modes
+  * For multiple conditions (if A then X, if B then Y, if C then Z):
+    - Chain IF nodes: first IF → branch_false leads to second IF → branch_false leads to third IF
+    - Each IF has branch_true actions, branch_false continues to next condition
+  * For "regardless of" logic: Use "parallel" mode from trigger
+  * IF nodes ALWAYS use "sequential" mode (never parallel)
+  * Branch actions use "branch_true"/"branch_false" modes
+  * Multiple actions in same branch can be parallel to each other
+  * Use unique action names for different branches
 
+- Multi-Condition Patterns:
+  * "If A then X, if B then Y, if C then Z" → Chain IF nodes with branch_false leading to next IF
+  * "For all cases do Z" → Add Z as parallel action from trigger
+  * "Regardless of condition" → Always parallel mode from trigger
+  * Avoid sequential IF chains - use nested branch_false connections
 - Parameter Requirements:
   * Email addresses: Must be valid format (user@domain.com)
   * URLs: Must include protocol (https://)
@@ -222,34 +225,95 @@ Output: {
   ]
 }
 
-Input: Process order data, if total > $100 apply discount, then send confirmation and update inventory
+Input: If lead score is excellent send email and SMS, if good send email only, if poor add to newsletter. For all leads update CRM.
 Output: {
-  "trigger": "webhook.new_order",
+  "trigger": "webhook.new_lead",
   "actions": [
     {
-      "action": "function.calculate_total",
-      "params": { "functionCode": "return $input.items.reduce((sum, item) => sum + item.price * item.quantity, 0);" },
+      "action": "salesforce.update_record",
+      "params": {
+        "recordId": "{{$json.recordId}}",
+        "fields": { "leadScore": "{{$json.leadScore}}", "lastContacted": "{{$now}}" }
+      },
+      "mode": "parallel"
+    },
+    {
+      "action": "if.check_excellent_score",
+      "params": {
+        "rules": [{ "condition": "equals", "value1": "{{$json.leadScore}}", "value2": "excellent" }]
+      },
       "mode": "sequential"
     },
     {
-      "action": "if.check_high_value",
-      "params": { "rules": [{ "condition": "number", "operation": "larger", "value1": "{{$node[\"Function\"].json.total}}", "value2": 100 }] },
-      "mode": "sequential"
-    },
-    {
-      "action": "function.apply_discount",
-      "params": { "functionCode": "return { ...$input, discount: 0.1, finalTotal: $input.total * 0.9 };" },
+      "action": "gmail.send_excellent_email",
+      "params": {
+        "to": "{{$json.email}}",
+        "subject": "Premium Welcome!",
+        "message": "We're excited to work with you!"
+      },
       "mode": "branch_true"
     },
     {
-      "action": "gmail.send_confirmation",
-      "params": { "to": "{{$json.customerEmail}}", "subject": "Order Confirmation", "message": "Your order total: {{ $json.finalTotal || $json.total }} },
-      "mode": "sequential"
+      "action": "twilio.send_sms",
+      "params": {
+        "to": "{{$json.phone}}",
+        "message": "Welcome! We'll contact you soon."
+      },
+      "mode": "branch_true"
     },
     {
-      "action": "airtable.update_inventory",
-      "params": { "table": "inventory", "fields": { "status": "sold", "orderId": "{{$json.orderId}}" } },
-      "mode": "parallel"
+      "action": "salesforce.create_task",
+      "params": {
+        "priority": "high",
+        "description": "Follow up with excellent lead"
+      },
+      "mode": "branch_true"
+    },
+    {
+      "action": "if.check_good_score",
+      "params": {
+        "rules": [{ "condition": "equals", "value1": "{{$json.leadScore}}", "value2": "good" }]
+      },
+      "mode": "branch_false"
+    },
+    {
+      "action": "gmail.send_good_email",
+      "params": {
+        "to": "{{$json.email}}",
+        "subject": "Welcome!",
+        "message": "Thanks for your interest!"
+      },
+      "mode": "branch_true"
+    },
+    {
+      "action": "hubspot.add_to_campaign",
+      "params": {
+        "campaignId": "NURTURE_CAMPAIGN_123"
+      },
+      "mode": "branch_true"
+    },
+    {
+      "action": "if.check_poor_score",
+      "params": {
+        "rules": [{ "condition": "equals", "value1": "{{$json.leadScore}}", "value2": "poor" }]
+      },
+      "mode": "branch_false"
+    },
+    {
+      "action": "mailchimp.add_to_newsletter",
+      "params": {
+        "listId": "NEWSLETTER_123",
+        "email": "{{$json.email}}"
+      },
+      "mode": "branch_true"
+    },
+    {
+      "action": "postgres.log_lead_review",
+      "params": {
+        "table": "leads_for_review",
+        "fields": { "leadId": "{{$json.leadId}}", "score": "{{$json.leadScore}}" }
+      },
+      "mode": "branch_true"
     }
   ]
 }
@@ -286,7 +350,7 @@ Output: {
     contents: [{ role: "user", parts: [{ text: description }] }],
     generationConfig: {
       temperature: 0,
-      maxOutputTokens: 4096,
+      maxOutputTokens: 5096,
       responseMimeType: "application/json",
     },
   };
