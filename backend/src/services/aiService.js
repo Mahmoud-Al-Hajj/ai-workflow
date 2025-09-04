@@ -350,7 +350,7 @@ Output: {
     contents: [{ role: "user", parts: [{ text: description }] }],
     generationConfig: {
       temperature: 0,
-      maxOutputTokens: 5096,
+      maxOutputTokens: 7096,
       responseMimeType: "application/json",
     },
   };
