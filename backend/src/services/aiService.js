@@ -86,6 +86,36 @@ You are an expert AI that converts any natural language workflow description int
   * Multiple actions in same branch can be parallel to each other
   * Use unique action names for different branches
 
+- IF CONDITION FORMAT - Use this exact structure:
+  * For checking if field exists:
+    "conditions": {
+      "options": { "caseSensitive": true, "typeValidation": "strict", "version": 2 },
+      "conditions": [
+        {
+          "id": "condition-exists-check",
+          "leftValue": "={{ $json.fieldName }}",
+          "rightValue": "",
+          "operator": { "type": "string", "operation": "exists", "singleValue": true }
+        }
+      ],
+      "combinator": "and"
+    }
+  * For comparing values:
+    "conditions": {
+      "options": { "caseSensitive": true, "typeValidation": "strict", "version": 2 },
+      "conditions": [
+        {
+          "id": "condition-equals-check",
+          "leftValue": "={{ $json.status }}",
+          "rightValue": "active",
+          "operator": { "type": "string", "operation": "equals", "singleValue": true }
+        }
+      ],
+      "combinator": "and"
+    }
+  * Always use unique IDs for each condition
+  * Always include "options" with version 2
+
 - Multi-Condition Patterns:
   * "If A then X, if B then Y, if C then Z" → Chain IF nodes with branch_false leading to next IF
   * "For all cases do Z" → Add Z as parallel action from trigger
@@ -194,13 +224,18 @@ Output: {
     {
       "action": "if.check_premium",
       "params": {
-        "rules": [
-          {
-            "condition": "equals",
-            "value1": "{{$json.status}}",
-            "value2": "premium"
-          }
-        ]
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "strict", "version": 2 },
+          "conditions": [
+            {
+              "id": "condition-premium-check",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "premium",
+              "operator": { "type": "string", "operation": "equals", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        }
       },
       "mode": "sequential"
     },
@@ -240,7 +275,18 @@ Output: {
     {
       "action": "if.check_excellent_score",
       "params": {
-        "rules": [{ "condition": "equals", "value1": "{{$json.leadScore}}", "value2": "excellent" }]
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "strict", "version": 2 },
+          "conditions": [
+            {
+              "id": "condition-excellent-check",
+              "leftValue": "={{ $json.leadScore }}",
+              "rightValue": "excellent",
+              "operator": { "type": "string", "operation": "equals", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        }
       },
       "mode": "sequential"
     },
@@ -272,7 +318,18 @@ Output: {
     {
       "action": "if.check_good_score",
       "params": {
-        "rules": [{ "condition": "equals", "value1": "{{$json.leadScore}}", "value2": "good" }]
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "strict", "version": 2 },
+          "conditions": [
+            {
+              "id": "condition-good-check",
+              "leftValue": "={{ $json.leadScore }}",
+              "rightValue": "good",
+              "operator": { "type": "string", "operation": "equals", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        }
       },
       "mode": "branch_false"
     },
@@ -295,7 +352,18 @@ Output: {
     {
       "action": "if.check_poor_score",
       "params": {
-        "rules": [{ "condition": "equals", "value1": "{{$json.leadScore}}", "value2": "poor" }]
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "strict", "version": 2 },
+          "conditions": [
+            {
+              "id": "condition-poor-check",
+              "leftValue": "={{ $json.leadScore }}",
+              "rightValue": "poor",
+              "operator": { "type": "string", "operation": "equals", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        }
       },
       "mode": "branch_false"
     },
