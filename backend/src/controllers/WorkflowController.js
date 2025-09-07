@@ -32,6 +32,7 @@ export class WorkflowController {
         data: result,
       });
     } catch (error) {
+      console.error("Workflow creation error:", error);
       res.status(500).json({
         success: false,
         error: error.message,
