@@ -40,6 +40,16 @@ app.get("/", (req, res) => {
     env: process.env.NODE_ENV || "development",
   });
 });
+
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "healthy",
+    uptime: process.uptime(),
+    timestamp: Date.now(),
+    memory: process.memoryUsage(),
+    env: process.env.NODE_ENV || "development",
+  });
+});
 //handling 404 (route not found).
 app.use((req, res) => {
   res.status(404).json({

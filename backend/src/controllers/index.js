@@ -2,9 +2,10 @@ import dotenv from "dotenv";
 import { getUserJsonFromEnglish } from "../services/aiService.js";
 import { deployWorkflow } from "../services/deploymentService.js";
 
-// Load environment variables
 dotenv.config();
 
+//this uses the .env variables and its for testing purposes
+//and also not to use the apis each time i want to test
 const API_KEY = process.env.N8N_API_KEY;
 const N8N_URL = process.env.N8N_URL;
 

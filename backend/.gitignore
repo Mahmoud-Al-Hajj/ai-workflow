@@ -3,6 +3,7 @@
 .env.local
 .env.development
 .env.production
+.env.docker
 
 # Dependencies
 node_modules/
@@ -44,3 +45,6 @@ dist/
 build/
 
 /src/generated/prisma
+
+docker-compose.yml
+Dockerfile

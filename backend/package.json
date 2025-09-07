@@ -4,10 +4,18 @@
   "description": "",
   "main": "src/api.js",
   "scripts": {
-    "start": "node src/api.js",
+    "start": "npx prisma migrate deploy && node src/api.js",
+    "start:dev": "node src/api.js",
     "dev": "node src/api.js",
     "demo": "node src/controllers/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docker:build": "docker build -t ai-workflow-backend .",
+    "docker:run": "docker-compose up -d",
+    "docker:stop": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "prisma:generate": "npx prisma generate",
+    "prisma:migrate": "npx prisma migrate deploy",
+    "prisma:reset": "npx prisma migrate reset --force"
   },
   "keywords": [],
   "author": "",
