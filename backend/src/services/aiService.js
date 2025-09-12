@@ -11,6 +11,59 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 // Load official nodes and generate service list
+function getAvailableNodes() {
+  const nodesPath = path.join(__dirname, "../../nodes");
+  try {
+    const nodes = fs
+      .readdirSync(nodesPath, { withFileTypes: true })
+      .filter((dirent) => dirent.isDirectory())
+      .map((dirent) => dirent.name.toLowerCase());
+    return new Set(nodes);
+  } catch (err) {
+    console.warn("Could not load nodes directory:", err.message);
+    return new Set(["webhook", "httprequest", "schedule", "function", "if"]); // fallback
+  }
+}
+
+function validateAndFixWorkflow(json, availableNodes) {
+  let modified = false;
+
+  // Validate trigger
+  const triggerParts = json.trigger.split(".");
+  const triggerService = triggerParts[0];
+  if (!availableNodes.has(triggerService)) {
+    console.log(
+      `Invalid trigger service '${triggerService}', replacing with 'webhook'`
+    );
+    json.trigger = "webhook.received";
+    if (!json.triggerParams) json.triggerParams = {};
+    modified = true;
+  }
+
+  // Validate actions
+  json.actions.forEach((action) => {
+    const actionParts = action.action.split(".");
+    const actionService = actionParts[0];
+    if (!availableNodes.has(actionService)) {
+      console.log(
+        `Invalid action service '${actionService}', replacing with 'httprequest'`
+      );
+      action.action = "httprequest.request";
+      // Adjust params to basic HTTP request
+      action.params = {
+        method: "GET",
+        url: "https://api.example.com/endpoint",
+        ...action.params, // keep any existing params
+      };
+      modified = true;
+    }
+  });
+
+  if (modified) {
+    console.log("Workflow JSON was modified to use valid n8n nodes");
+  }
+  return json;
+}
 
 export async function getUserJsonFromEnglish(description) {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -60,11 +113,14 @@ You are an expert AI that converts any natural language workflow description int
   - "Database" → "postgres" or "mysql"
   - "HTTP Request" → "httprequest"
   - "Webhook" → "webhook"
+  - "API call" → "webhook"
   - "Schedule/Cron" → "schedule"
   - "Function/Code" → "function"
   - "Google Calendar" → "googlecalendar"
   - "ML/AI Model" → "httprequest" (for external APIs)
   - "Data Storage" → "postgres", "mysql", or "airtable" choose one if not specified
+
+- IMPORTANT: Only use services that exist in the official n8n nodes list. If a mentioned service is not available in n8n (e.g., Shippo, Sift Science, quickbooks), map it to 'httprequest' for API integrations or 'webhook' for triggers. Do not invent node names.
 
 - For triggers, use format: "servicename.trigger" (e.g., "airtable.trigger", "gmail.trigger")
 - For actions, use format: "servicename.action" (e.g., "gmail.send_email", "whatsapp.send_message")
@@ -80,8 +136,9 @@ You are an expert AI that converts any natural language workflow description int
   * For multiple conditions (if A then X, if B then Y, if C then Z):
     - Chain IF nodes: first IF → branch_false leads to second IF → branch_false leads to third IF
     - Each IF has branch_true actions, branch_false continues to next condition
+    - The next IF in the chain MUST use "branch_false" mode to connect from the previous IF's false branch
   * For "regardless of" logic: Use "parallel" mode from trigger
-  * IF nodes ALWAYS use "sequential" mode (never parallel)
+  * IF nodes ALWAYS use "sequential" mode (never parallel) UNLESS they are chained, then use "branch_false" for subsequent IFs
   * Branch actions use "branch_true"/"branch_false" modes
   * Multiple actions in same branch can be parallel to each other
   * Use unique action names for different branches
@@ -248,6 +305,89 @@ Output: {
         "message": "Welcome to the basic service!"
       },
       "mode": "branch_false"
+    }
+  ]
+}
+
+Input: If fraud is detected block the order, otherwise validate customer and if stock is low send alert.
+Output: {
+  "trigger": "webhook.new_order",
+  "actions": [
+    {
+      "action": "httprequest.fraud_check",
+      "params": {
+        "url": "https://api.fraud.com/check",
+        "method": "POST"
+      },
+      "mode": "sequential"
+    },
+    {
+      "action": "if.fraud_detected",
+      "params": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "strict", "version": 2 },
+          "conditions": [
+            {
+              "id": "condition-fraud-check",
+              "leftValue": "={{ $json.fraud_score }}",
+              "rightValue": 0.8,
+              "operator": { "type": "number", "operation": "gt", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "mode": "sequential"
+    },
+    {
+      "action": "httprequest.block_order",
+      "params": {
+        "url": "https://api.order.com/block",
+        "method": "POST"
+      },
+      "mode": "branch_true"
+    },
+    {
+      "action": "httprequest.validate_customer",
+      "params": {
+        "url": "https://api.customer.com/validate",
+        "method": "GET"
+      },
+      "mode": "branch_false"
+    },
+    {
+      "action": "airtable.check_stock",
+      "params": {
+        "table": "inventory"
+      },
+      "mode": "branch_false"
+    },
+    {
+      "action": "if.stock_low",
+      "params": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "strict", "version": 2 },
+          "conditions": [
+            {
+              "id": "condition-stock-check",
+              "leftValue": "={{ $json.stock }}",
+              "rightValue": 10,
+              "operator": { "type": "number", "operation": "lt", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "mode": "branch_false"
+    },
+    {
+      "action": "gmail.send_alert",
+      "params": {
+        "to": "alert@example.com",
+        "subject": "Low Stock",
+        "message": "Stock is low"
+      },
+      "mode": "branch_true"
     }
   ]
 }
@@ -430,7 +570,13 @@ Output: {
   const cleaned = text.replace(/```json|```/g, "").trim();
 
   try {
-    return JSON.parse(cleaned); // pure JSON object
+    const parsedJson = JSON.parse(cleaned); // pure JSON object
+
+    // Validate and fix invalid nodes
+    const availableNodes = getAvailableNodes();
+    const validatedJson = validateAndFixWorkflow(parsedJson, availableNodes);
+
+    return validatedJson;
   } catch (err) {
     throw new Error("Failed to parse JSON from Gemini output: " + cleaned);
   }

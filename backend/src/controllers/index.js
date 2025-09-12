@@ -11,7 +11,8 @@ const N8N_URL = process.env.N8N_URL;
 
 async function main() {
   const englishInput =
-    "When a new Shopify order is received, validate the customer data using Clearbit, check inventory levels in Airtable, if stock is low send urgent Slack notification to warehouse team and email to supplier, otherwise process the order by creating invoice in QuickBooks, sending confirmation email via Gmail, posting order summary to Discord channel, and updating customer record in HubSpot with order details and purchase history.";
+    "When a new order arrives in Shippo, perform fraud detection using Sift Science, if fraud is detected block the order and notify the admin via Slack, otherwise validate the customer with Clearbit, check inventory in Airtable, and if stock is low send an email to the supplier via Gmail, else process the order by creating an invoice in QuickBooks and updating the customer record in HubSpot.";
+
   const userJson = await getUserJsonFromEnglish(englishInput);
 
   await deployWorkflow(userJson, API_KEY, N8N_URL);
