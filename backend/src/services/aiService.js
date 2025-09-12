@@ -3,6 +3,7 @@ import axios from "axios";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { nodeMatchingService } from "./nodeMatchingService.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,66 +14,25 @@ dotenv.config();
 // Load official nodes and generate service list
 function getAvailableNodes() {
   const nodesPath = path.join(__dirname, "../../nodes");
-  try {
-    const nodes = fs
-      .readdirSync(nodesPath, { withFileTypes: true })
-      .filter((dirent) => dirent.isDirectory())
-      .map((dirent) => dirent.name.toLowerCase());
-    return new Set(nodes);
-  } catch (err) {
-    console.warn("Could not load nodes directory:", err.message);
-    return new Set(["webhook", "httprequest", "schedule", "function", "if"]); // fallback
-  }
-}
-
-function validateAndFixWorkflow(json, availableNodes) {
-  let modified = false;
-
-  // Validate trigger
-  const triggerParts = json.trigger.split(".");
-  const triggerService = triggerParts[0];
-  if (!availableNodes.has(triggerService)) {
-    console.log(
-      `Invalid trigger service '${triggerService}', replacing with 'webhook'`
-    );
-    json.trigger = "webhook.received";
-    if (!json.triggerParams) json.triggerParams = {};
-    modified = true;
-  }
-
-  // Validate actions
-  json.actions.forEach((action) => {
-    const actionParts = action.action.split(".");
-    const actionService = actionParts[0];
-    if (!availableNodes.has(actionService)) {
-      console.log(
-        `Invalid action service '${actionService}', replacing with 'httprequest'`
-      );
-      action.action = "httprequest.request";
-      // Adjust params to basic HTTP request
-      action.params = {
-        method: "GET",
-        url: "https://api.example.com/endpoint",
-        ...action.params, // keep any existing params
-      };
-      modified = true;
-    }
-  });
-
-  if (modified) {
-    console.log("Workflow JSON was modified to use valid n8n nodes");
-  }
-  return json;
+  const nodes = fs
+    .readdirSync(nodesPath, { withFileTypes: true })
+    .filter((dirent) => dirent.isDirectory())
+    .map((dirent) => dirent.name.toLowerCase());
+  return new Set(nodes);
 }
 
 export async function getUserJsonFromEnglish(description) {
   const apiKey = process.env.GEMINI_API_KEY;
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
+  // Generate dynamic service mappings based on user input
+  const dynamicMappings =
+    nodeMatchingService.generateServiceMappings(description);
+
   const systemInstruction = `
 You are an expert AI that converts any natural language workflow description into a valid n8n workflow JSON.
 
-- Output ONLY a JSON object. No text, no markdown, no comments, no code fences.
+- Output ONLY a single JSON object. No text, no markdown, no comments, no code fences.
 - JSON schema must be strictly followed:
 {
   "trigger": "<trigger>",
@@ -100,12 +60,12 @@ You are an expert AI that converts any natural language workflow description int
   - "WhatsApp" → "whatsapp"
   - "Google Sheets" → "googlesheets" 
   - "Google Drive" → "googledrive"
-  - "Google Workspace" → "googleworkspace"
   - "Microsoft 365" → "microsoft365"
   - "OpenAI" → "openai"
   - "Gmail" → "gmail"
   - "Slack" → "slack"
   - "Discord" → "discord"
+  - "email" → "gmail"
   - "Airtable" → "airtable"
   - "Salesforce" → "salesforce"
   - "HubSpot" → "hubspot"
@@ -128,7 +88,10 @@ You are an expert AI that converts any natural language workflow description int
   * IF/Switch Nodes: Use "if.condition" for conditional branching (e.g., "if.status_active", "if.user_verified")
   * Function Nodes: Use "function.custom" for JavaScript processing (e.g., "function.transform_data", "function.validate_input")
   * Merge Nodes: Use "merge.combine" for combining multiple inputs (e.g., "merge.join_branches", "merge.aggregate_results")
-  * Delay Nodes: Use "delay.wait" for timing controls (e.g., "delay.5_minutes", "delay.2_hours")
+  * Wait Nodes: Use "wait" for timing controls with separate amount and unit (e.g., "wait.5_minutes", "wait.2_hours")
+    - Parameters should be: { "amount": number, "unit": "seconds|minutes|hours|days" }
+    - Example: { "amount": 30, "unit": "minutes" } for 30 minutes
+    - Example: { "amount": 2, "unit": "hours" } for 2 hours
   * Branching: Actions after IF conditions use "branch_true" or "branch_false"
   
  - Branching Guidelines:
@@ -262,10 +225,10 @@ Input: Create an Airtable record and send a Telegram message when I get a webhoo
 Output: { "trigger": "webhook.received", "actions": [ { "action": "airtable.create_record", "params": { "table": "leads", "fields": { "source": "webhook", "status": "new" } }, "mode": "parallel" }, { "action": "telegram.send_message", "params": { "chat_id": "@notifications", "message": "New webhook received and processed." }, "mode": "parallel" } ] }
 
 Input: When new lead comes in, send welcome email immediately, then wait 2 hours and send follow-up, also notify sales team right away
-Output: { "trigger": "webhook.new_lead", "actions": [ { "action": "gmail.send_email", "params": { "to": "lead@example.com", "subject": "Welcome!", "message": "Thanks for your interest!" }, "mode": "parallel" }, { "action": "slack.post_message", "params": { "channel": "#sales", "message": "New lead received" }, "mode": "parallel" }, { "action": "delay.wait", "params": { "duration": "2h" }, "mode": "sequential" }, { "action": "gmail.send_email", "params": { "to": "lead@example.com", "subject": "Follow-up", "message": "How can we help you further?" }, "mode": "sequential" } ] }
+Output: { "trigger": "webhook.new_lead", "actions": [ { "action": "gmail.send_email", "params": { "to": "lead@example.com", "subject": "Welcome!", "message": "Thanks for your interest!" }, "mode": "parallel" }, { "action": "slack.post_message", "params": { "channel": "#sales", "message": "New lead received" }, "mode": "parallel" }, { "action": "wait.delay", "params": { "amount": 2, "unit": "hours" }, "mode": "sequential" }, { "action": "gmail.send_email", "params": { "to": "lead@example.com", "subject": "Follow-up", "message": "How can we help you further?" }, "mode": "sequential" } ] }
 
 Input: First send email, then wait 5 minutes, then post to Slack
-Output: { "trigger": "webhook.start", "actions": [ { "action": "gmail.send_email", "params": { "to": "user@example.com", "subject": "Process Started", "message": "Workflow has begun." }, "mode": "sequential" }, { "action": "delay.wait", "params": { "duration": "5m" }, "mode": "sequential" }, { "action": "slack.post_message", "params": { "channel": "#updates", "message": "Process completed after delay." }, "mode": "sequential" } ] }
+Output: { "trigger": "webhook.start", "actions": [ { "action": "gmail.send_email", "params": { "to": "user@example.com", "subject": "Process Started", "message": "Workflow has begun." }, "mode": "sequential" }, { "action": "wait.delay", "params": { "amount": 5, "unit": "minutes" }, "mode": "sequential" }, { "action": "slack.post_message", "params": { "channel": "#updates", "message": "Process completed after delay." }, "mode": "sequential" } ] }
 Input: If the user's status is premium, send a welcome email to premium@example.com, otherwise send a basic email to basic@example.com
 Output: {
   "trigger": "webhook.new_user",
@@ -546,7 +509,9 @@ Output: {
 `;
 
   const body = {
-    systemInstruction: { parts: [{ text: systemInstruction }] },
+    systemInstruction: {
+      parts: [{ text: systemInstruction + dynamicMappings }],
+    },
     contents: [{ role: "user", parts: [{ text: description }] }],
     generationConfig: {
       temperature: 0,
@@ -572,11 +537,8 @@ Output: {
   try {
     const parsedJson = JSON.parse(cleaned); // pure JSON object
 
-    // Validate and fix invalid nodes
-    const availableNodes = getAvailableNodes();
-    const validatedJson = validateAndFixWorkflow(parsedJson, availableNodes);
-
-    return validatedJson;
+    // Return the pure AI output without any validation/modification
+    return parsedJson;
   } catch (err) {
     throw new Error("Failed to parse JSON from Gemini output: " + cleaned);
   }

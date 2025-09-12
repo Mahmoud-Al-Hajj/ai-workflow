@@ -11,8 +11,7 @@ const N8N_URL = process.env.N8N_URL;
 
 async function main() {
   const englishInput =
-    "When a new order arrives in Shippo, perform fraud detection using Sift Science, if fraud is detected block the order and notify the admin via Slack, otherwise validate the customer with Clearbit, check inventory in Airtable, and if stock is low send an email to the supplier via Gmail, else process the order by creating an invoice in QuickBooks and updating the customer record in HubSpot.";
-
+    "When I receive a new email in Gmail, create an Airtable record, post a message to Slack, send a Twilio SMS, wait 30 minutes, then make an HTTP API call to update my CRM and finally send a Discord notification";
   const userJson = await getUserJsonFromEnglish(englishInput);
 
   await deployWorkflow(userJson, API_KEY, N8N_URL);

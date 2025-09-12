@@ -166,12 +166,11 @@ export class WorkflowService {
     if (action.startsWith("if.")) {
       return "n8n-nodes-base.if";
     }
-    // if (action.startsWith("function.")) {
-    //   return "n8n-nodes-base.function";
-    // }
-    // if (action.startsWith("merge.")) {
-    //   return "n8n-nodes-base.merge";
-    // }
+
+    // Special case mappings for wait node
+    if (action.startsWith("wait")) {
+      return "n8n-nodes-base.wait";
+    }
 
     // Use the dynamic node catalog directly
     return this.nodeCatalog[serviceName] || "n8n-nodes-base.set";
