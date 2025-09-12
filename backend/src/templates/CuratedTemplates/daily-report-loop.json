@@ -1,0 +1,48 @@
+{
+  "trigger": "schedule.every_day_8am",
+  "triggerParams": {
+    "triggerTimes": {
+      "item": [
+        {
+          "mode": "custom",
+          "cronExpression": "0 8 * * *"
+        }
+      ]
+    }
+  },
+  "actions": [
+    {
+      "action": "postgres.get_pending_reports",
+      "params": {
+        "table": "reports",
+        "status": "pending"
+      },
+      "mode": "sequential"
+    },
+    {
+      "action": "function.split_in_batches",
+      "params": {
+        "batchSize": 1
+      },
+      "mode": "sequential"
+    },
+    {
+      "action": "gmail.send_email",
+      "params": {
+        "to": "{{$json.recipient}}",
+        "subject": "Daily Report",
+        "message": "Here is your daily report: {{$json.report_data}}"
+      },
+      "mode": "sequential"
+    },
+    {
+      "action": "postgres.update_status",
+      "params": {
+        "table": "reports",
+        "status": "sent",
+        "report_id": "{{$json.report_id}}"
+      },
+      "mode": "sequential"
+    }
+  ]
+}

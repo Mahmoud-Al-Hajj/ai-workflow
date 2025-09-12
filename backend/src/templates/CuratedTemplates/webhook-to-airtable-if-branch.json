@@ -1,0 +1,33 @@
+{
+  "trigger": "webhook.received",
+  "actions": [
+    {
+      "action": "airtable.create_record",
+      "params": {
+        "table": "leads",
+        "fields": { "name": "{{$json.name}}", "amount": "{{$json.amount}}" }
+      },
+      "mode": "sequential"
+    },
+    {
+      "action": "if.amount_gt_1000",
+      "params": {
+        "conditions": {
+          "leftValue": "={{ $json.amount }}",
+          "rightValue": 1000,
+          "operator": { "type": "number", "operation": "gt", "singleValue": true }
+        }
+      },
+      "mode": "sequential"
+    },
+    {
+      "action": "gmail.send_alert",
+      "params": {
+        "to": "alert@example.com",
+        "subject": "High Value Alert",
+        "message": "A record with amount > 1000 was received: {{$json.name}}, {{$json.amount}}."
+      },
+      "mode": "branch_true"
+    }
+  ]
+}

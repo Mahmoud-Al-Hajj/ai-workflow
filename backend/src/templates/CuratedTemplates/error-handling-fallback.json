@@ -1,0 +1,40 @@
+{
+  "trigger": "webhook.received",
+  "actions": [
+    {
+      "action": "httprequest.api_call",
+      "params": {
+        "method": "GET",
+        "url": "https://api.example.com/data"
+      },
+      "mode": "sequential"
+    },
+    {
+      "action": "if.api_failed",
+      "params": {
+        "conditions": {
+          "leftValue": "={{ $json.status_code }}",
+          "rightValue": 500,
+          "operator": { "type": "number", "operation": "gte", "singleValue": true }
+        }
+      },
+      "mode": "sequential"
+    },
+    {
+      "action": "gmail.send_error_email",
+      "params": {
+        "to": "admin@example.com",
+        "subject": "API Failure",
+        "message": "API call failed with status {{$json.status_code}}"
+      },
+      "mode": "branch_true"
+    },
+    {
+      "action": "function.retry_api_call",
+      "params": {
+        "maxRetries": 3
+      },
+      "mode": "branch_false"
+    }
+  ]
+}

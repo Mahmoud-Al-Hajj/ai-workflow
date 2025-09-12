@@ -1,0 +1,59 @@
+{
+  "trigger": "webhook.new_ticket",
+  "actions": [
+    {
+      "action": "if.severity_check",
+      "params": {
+        "conditions": {
+          "leftValue": "={{ $json.severity }}",
+          "rightValue": "critical",
+          "operator": {
+            "type": "string",
+            "operation": "equals",
+            "singleValue": true
+          }
+        }
+      },
+      "mode": "sequential"
+    },
+    {
+      "action": "slack.post_message",
+      "params": {
+        "channel": "#support",
+        "message": "Critical ticket created!"
+      },
+      "mode": "branch_true"
+    },
+    {
+      "action": "whatsapp.send_message",
+      "params": {
+        "to": "+1000000000",
+        "message": "CRITICAL support ticket requires immediate attention!"
+      },
+      "mode": "parallel"
+    },
+    {
+      "action": "postgres.insert",
+      "params": {
+        "table": "tickets"
+      },
+      "mode": "branch_false"
+    },
+    {
+      "action": "delay.wait",
+      "params": {
+        "duration": "10m"
+      },
+      "mode": "branch_false"
+    },
+    {
+      "action": "gmail.send_email",
+      "params": {
+        "to": "={{ $json.customer_email }}",
+        "subject": "We’re on it!",
+        "message": "Your ticket has been assigned to an agent. We’ll follow up shortly."
+      },
+      "mode": "branch_false"
+    }
+  ]
+}

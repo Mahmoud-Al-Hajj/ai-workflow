@@ -1,0 +1,22 @@
+{
+  "trigger": "github.new_issue",
+  "actions": [
+    {
+      "action": "gmail.send_email",
+      "params": {
+        "to": "devteam@example.com",
+        "subject": "New GitHub Issue: {{$json.title}}",
+        "message": "A new issue was created: {{$json.body}}"
+      },
+      "mode": "parallel"
+    },
+    {
+      "action": "slack.post_message",
+      "params": {
+        "channel": "#dev-alerts",
+        "message": "New GitHub issue: {{$json.title}}"
+      },
+      "mode": "parallel"
+    }
+  ]
+}

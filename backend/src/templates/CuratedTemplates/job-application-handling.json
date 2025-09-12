@@ -1,0 +1,51 @@
+{
+  "trigger": "webhook.new_application",
+  "actions": [
+    {
+      "action": "if.resume_check",
+      "params": {
+        "conditions": {
+          "leftValue": "={{ $json.resume }}",
+          "rightValue": "",
+          "operator": {
+            "type": "string",
+            "operation": "exists",
+            "singleValue": true
+          }
+        }
+      },
+      "mode": "sequential"
+    },
+    {
+      "action": "gmail.send_email",
+      "params": {
+        "to": "={{ $json.email }}",
+        "subject": "Application Rejected",
+        "message": "Your application was rejected because no resume was attached."
+      },
+      "mode": "branch_false"
+    },
+    {
+      "action": "googledrive.upload",
+      "params": {
+        "folder": "Resumes"
+      },
+      "mode": "branch_true"
+    },
+    {
+      "action": "airtable.insert",
+      "params": {
+        "table": "candidates"
+      },
+      "mode": "sequential"
+    },
+    {
+      "action": "slack.post_message",
+      "params": {
+        "channel": "#hr",
+        "message": "New candidate application stored."
+      },
+      "mode": "sequential"
+    }
+  ]
+}

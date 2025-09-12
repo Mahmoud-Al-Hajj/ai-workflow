@@ -1,0 +1,29 @@
+{
+  "trigger": "webhook.start",
+  "actions": [
+    {
+      "action": "gmail.send_email",
+      "params": {
+        "to": "user@example.com",
+        "subject": "Process Started",
+        "message": "Workflow has begun."
+      },
+      "mode": "sequential"
+    },
+    {
+      "action": "delay.wait",
+      "params": {
+        "duration": "5m"
+      },
+      "mode": "sequential"
+    },
+    {
+      "action": "slack.post_message",
+      "params": {
+        "channel": "#updates",
+        "message": "Process completed after delay."
+      },
+      "mode": "sequential"
+    }
+  ]
+}

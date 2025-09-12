@@ -1,0 +1,147 @@
+{
+  "name": "AI-Powered DevOps Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "event": "push"
+      },
+      "id": "1",
+      "name": "GitHub Trigger",
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "github-webhook"
+    },
+    {
+      "parameters": {
+        "text": "Commit Message: {{$json[\"head_commit\"][\"message\"]}}"
+      },
+      "id": "2",
+      "name": "AI Summarize Commit",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [550, 300],
+      "credentials": {
+        "openAiApi": "OpenAI Account"
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json[\"ref\"]}}",
+              "operation": "contains",
+              "value2": "refs/heads/main"
+            }
+          ]
+        }
+      },
+      "id": "3",
+      "name": "Check Branch",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "projectKey": "DEV",
+        "summary": "AI Commit Summary",
+        "description": "{{$node[\"AI Summarize Commit\"].json[\"data\"]}}",
+        "issueType": "Task"
+      },
+      "id": "4",
+      "name": "Create Jira Issue",
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [1150, 150],
+      "credentials": {
+        "jiraSoftwareCloudApi": "Jira Account"
+      }
+    },
+    {
+      "parameters": {
+        "channel": "#dev-updates",
+        "text": "🚀 New commit pushed by {{$json[\"head_commit\"][\"author\"][\"name\"]}}.\n\nAI Summary: {{$node[\"AI Summarize Commit\"].json[\"data\"]}}"
+      },
+      "id": "5",
+      "name": "Notify Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1150, 300],
+      "credentials": {
+        "slackApi": "Slack Account"
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "sheetId": "your-google-sheet-id",
+        "range": "Commits!A:D",
+        "valueInputMode": "RAW",
+        "options": {},
+        "values": [
+          [
+            "={{$json[\"head_commit\"][\"id\"]}}",
+            "={{$json[\"head_commit\"][\"author\"][\"name\"]}}",
+            "={{$json[\"head_commit\"][\"message\"]}}",
+            "={{$node[\"AI Summarize Commit\"].json[\"data\"]}}"
+          ]
+        ]
+      },
+      "id": "6",
+      "name": "Log to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [1150, 450],
+      "credentials": {
+        "googleSheetsOAuth2Api": "Google Sheets Account"
+      }
+    }
+  ],
+  "connections": {
+    "GitHub Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Summarize Commit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Summarize Commit": {
+      "main": [
+        [
+          {
+            "node": "Check Branch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Branch": {
+      "main": [
+        [
+          {
+            "node": "Create Jira Issue",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify Slack",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

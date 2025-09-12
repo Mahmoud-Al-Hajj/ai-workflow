@@ -1,0 +1,67 @@
+{
+  "trigger": "webhook.subscription_update",
+  "actions": [
+    {
+      "action": "if.cancelled_check",
+      "params": {
+        "conditions": {
+          "leftValue": "={{ $json.status }}",
+          "rightValue": "cancelled",
+          "operator": {
+            "type": "string",
+            "operation": "equals",
+            "singleValue": true
+          }
+        }
+      },
+      "mode": "sequential"
+    },
+    {
+      "action": "gmail.send_email",
+      "params": {
+        "to": "={{ $json.email }}",
+        "subject": "Goodbye from our service",
+        "message": "We’re sorry to see you go."
+      },
+      "mode": "branch_true"
+    },
+    {
+      "action": "if.paypal_check",
+      "params": {
+        "conditions": {
+          "leftValue": "={{ $json.payment_method }}",
+          "rightValue": "paypal",
+          "operator": {
+            "type": "string",
+            "operation": "equals",
+            "singleValue": true
+          }
+        }
+      },
+      "mode": "branch_false"
+    },
+    {
+      "action": "airtable.insert",
+      "params": {
+        "table": "paypal_renewals"
+      },
+      "mode": "branch_true"
+    },
+    {
+      "action": "postgres.insert",
+      "params": {
+        "table": "renewals"
+      },
+      "mode": "branch_false"
+    },
+    {
+      "action": "gmail.send_email",
+      "params": {
+        "to": "={{ $json.email }}",
+        "subject": "Subscription Renewed",
+        "message": "Your subscription has been renewed successfully!"
+      },
+      "mode": "sequential"
+    }
+  ]
+}
