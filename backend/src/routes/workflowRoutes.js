@@ -16,17 +16,29 @@ import {
 const router = express.Router();
 const workflowController = new WorkflowController();
 
-router.get("/workflows", adminMiddleware, authMiddleware, (req, res) =>
-  workflowController.getAllWorkflows(req, res)
+router.get(
+  "/workflows",
+  workflowLimiter,
+  adminMiddleware,
+  authMiddleware,
+  (req, res) => workflowController.getAllWorkflows(req, res)
 );
-router.get("/workflows/user/:userId", authMiddleware, (req, res) =>
+router.get("/workflows/user/:userId", apiLimiter, authMiddleware, (req, res) =>
   workflowController.getWorkflowsForUser(req, res)
 );
-router.get("/workflows/:id", validateIdParam, authMiddleware, (req, res) =>
-  workflowController.getWorkflowById(req, res)
+router.get(
+  "/workflows/:id",
+  apiLimiter,
+  validateIdParam,
+  authMiddleware,
+  (req, res) => workflowController.getWorkflowById(req, res)
 );
-router.post("/workflows", validateCreateWorkflow, authMiddleware, (req, res) =>
-  workflowController.createCompleteWorkflow(req, res)
+router.post(
+  "/workflows",
+  workflowLimiter,
+  validateCreateWorkflow,
+  authMiddleware,
+  (req, res) => workflowController.createCompleteWorkflow(req, res)
 );
 router.delete(
   "/workflows/:id",

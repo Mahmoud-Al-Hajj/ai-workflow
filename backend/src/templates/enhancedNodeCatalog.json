@@ -742,7 +742,7 @@
     "group": []
   },
   "httprequest": {
-    "action": "n8n-nodes-base.httprequest",
+    "action": "n8n-nodes-base.httpRequest",
     "trigger": null,
     "displayName": "HttpRequest",
     "description": "",

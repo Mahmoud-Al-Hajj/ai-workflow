@@ -1,4 +1,9 @@
-import { getAllNodeTemplates } from "./catalogService.js";
+import {
+  getAllNodeTemplates,
+  getTriggerType,
+  getActionType,
+  getNodeInfo,
+} from "./catalogService.js";
 import { getUserJsonFromEnglish } from "./aiService.js";
 import { WorkflowDatabaseService } from "./database/workflowDBService.js";
 import { deployWorkflow } from "./deploymentService.js";
@@ -141,38 +146,56 @@ export class WorkflowService {
     });
   }
 
-  // Dynamic trigger node type mapping using node catalog
+  // Dynamic trigger node type mapping using enhanced catalog
   getTriggerNodeType(trigger) {
     // Extract service name (everything before first dot)
     const serviceName = trigger.split(".")[0].toLowerCase();
+
+    // Handle schedule triggers
     if (trigger.startsWith("schedule.")) {
-      return "n8n-nodes-base.cron"; // Use n8n Schedule Trigger node
+      const cronTrigger = getTriggerType("cron");
+      return cronTrigger || "n8n-nodes-base.cron";
     }
-    // Try to find trigger version first
-    const triggerNodeName = serviceName + "trigger"; // e.g., "airtabletrigger"
-    if (this.nodeCatalog[triggerNodeName]) {
-      return this.nodeCatalog[triggerNodeName];
+
+    // Try to get trigger type from enhanced catalog
+    const triggerType = getTriggerType(serviceName);
+    if (triggerType) {
+      return triggerType;
+    }
+
+    // Try with "trigger" suffix
+    const triggerWithSuffix = getTriggerType(serviceName + "trigger");
+    if (triggerWithSuffix) {
+      return triggerWithSuffix;
     }
 
     // Fallback to manual trigger
     return "n8n-nodes-base.manualTrigger";
   }
 
-  // Dynamic action node type mapping using node catalog
+  // Dynamic action node type mapping using enhanced catalog
   getActionNodeType(action) {
     // Extract service name (everything before first dot)
     const serviceName = action.split(".")[0].toLowerCase();
 
+    // Handle special node types
     if (action.startsWith("if.")) {
-      return "n8n-nodes-base.if";
+      const ifAction = getActionType("if");
+      return ifAction || "n8n-nodes-base.if";
     }
 
-    // Special case mappings for wait node
     if (action.startsWith("wait")) {
-      return "n8n-nodes-base.wait";
+      const waitAction = getActionType("wait");
+      return waitAction || "n8n-nodes-base.wait";
     }
 
-    // Use the dynamic node catalog directly
+    // Try to get action type from enhanced catalog
+    const actionType = getActionType(serviceName);
+    if (actionType) {
+      return actionType;
+    }
+
+    // Use the dynamic node catalog as fallback
     return this.nodeCatalog[serviceName] || "n8n-nodes-base.set";
   }
 
