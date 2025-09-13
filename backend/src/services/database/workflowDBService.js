@@ -2,12 +2,14 @@ import prisma from "../../lib/prisma.js";
 
 export class WorkflowDatabaseService {
   // Simple database-only method
-  async createWorkflow({ name, data, userId }) {
-    return prisma.workflow.create({
+  async createWorkflow({ name, data, userId }, tx = null) {
+    const client = tx || prisma;
+    return client.workflow.create({
       data: {
         name,
         data,
         userId: Number(userId),
+        status: "PENDING",
       },
       include: {
         user: true,
@@ -33,5 +35,13 @@ export class WorkflowDatabaseService {
   }
   async deleteWorkflow(id) {
     return prisma.workflow.delete({ where: { id: Number(id) } });
+  }
+
+  async updateWorkflow(id, updateData, tx = null) {
+    const client = tx || prisma;
+    return client.workflow.update({
+      where: { id: Number(id) },
+      data: updateData,
+    });
   }
 }

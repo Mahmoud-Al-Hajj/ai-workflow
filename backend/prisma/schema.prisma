@@ -31,6 +31,8 @@ model Workflow {
   id        Int      @id @default(autoincrement())
   name      String   // Workflow name
   data      Json     // Actual workflow definition
+  status        String   @default("PENDING") // PENDING, ACTIVE, FAILED, DELETED
+  n8nWorkflowId String?  // Optional n8n workflow ID
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
