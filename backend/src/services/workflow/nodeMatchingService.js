@@ -1,4 +1,4 @@
-import { getAllNodeTemplates } from "./catalogService.js";
+import { getAllNodeTemplates } from "../catalogService.js";
 
 export class NodeMatchingService {
   constructor() {

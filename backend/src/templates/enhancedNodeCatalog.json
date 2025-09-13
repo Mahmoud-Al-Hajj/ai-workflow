@@ -1204,7 +1204,7 @@
     "group": []
   },
   "openai": {
-    "action": "n8n-nodes-base.openai",
+    "action": "n8n-nodes-base.openAi",
     "trigger": null,
     "displayName": "OpenAi",
     "description": "",

@@ -1,7 +1,7 @@
-import prisma from "../lib/prisma.js";
+import prisma from "../../lib/prisma.js";
 import bcrypt from "bcrypt";
-import { generateToken } from "../utils/jwt.js";
-import { encrypt } from "../utils/crypto.js";
+import { generateToken } from "../../utils/jwt.js";
+import { encrypt } from "../../utils/crypto.js";
 
 class AuthService {
   async login(email, password) {

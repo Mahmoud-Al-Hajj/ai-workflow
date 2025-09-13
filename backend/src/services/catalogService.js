@@ -26,7 +26,6 @@ function getAllNodeTemplates() {
   // Convert enhanced catalog to simple mapping format
   const nodeMap = {};
   Object.entries(enhancedNodes).forEach(([serviceName, nodeInfo]) => {
-    // Use action type as primary, fallback to trigger if no action
     const nodeType = nodeInfo.action || nodeInfo.trigger;
     if (nodeType) {
       nodeMap[serviceName.toLowerCase()] = nodeType;

@@ -1,18 +1,12 @@
-import {
-  getAllNodeTemplates,
-  getTriggerType,
-  getActionType,
-  getNodeInfo,
-} from "./catalogService.js";
 import { getUserJsonFromEnglish } from "./aiService.js";
 import { WorkflowDatabaseService } from "./database/workflowDBService.js";
-import { deployWorkflow } from "./deploymentService.js";
-import dagre from "dagre";
+import { deployWorkflow } from "./workflow/deploymentService.js";
+import { WorkflowBuilderService } from "./workflow/workflowBuilderService.js";
 
 export class WorkflowService {
   constructor() {
-    this.nodeCatalog = getAllNodeTemplates();
     this.workflowDBService = new WorkflowDatabaseService();
+    this.workflowBuilderService = new WorkflowBuilderService();
   }
 
   async createCompleteWorkflow({ description, userId, n8nUrl, n8nApiKey }) {
@@ -26,7 +20,8 @@ export class WorkflowService {
         n8nUrl
       );
 
-      const n8nWorkflow = this.buildWorkflow(aiWorkflowJson);
+      const n8nWorkflow =
+        this.workflowBuilderService.buildWorkflow(aiWorkflowJson);
       console.log(JSON.stringify(n8nWorkflow, null, 2));
       // Step 4: Save to database
       const savedWorkflow = await this.workflowDBService.createWorkflow({
@@ -46,221 +41,46 @@ export class WorkflowService {
     }
   }
 
-  buildWorkflow(userJson) {
-    const workflow = {
-      name: "AI Generated Workflow",
-      nodes: [],
-      connections: {},
-      settings: { saveExecutionProgress: true },
-    };
-
-    let nodeId = 1;
-    let prevNodeName = "Trigger";
-
-    // Add trigger node
-    workflow.nodes.push(
-      this.createNode({
-        id: nodeId,
-        name: "Trigger",
-        type: this.getTriggerNodeType(userJson.trigger),
-        position: [0, 0], // Initial position, will be updated by dagre
-        parameters: userJson.triggerParams || {},
-      })
-    );
-    nodeId++;
-
-    let currentIfNode = null;
-    for (const actionObj of userJson.actions) {
-      const nodeType = this.getActionNodeType(actionObj.action);
-      workflow.nodes.push(
-        this.createNode({
-          id: nodeId,
-          name: actionObj.action,
-          type: nodeType,
-          position: [0, 0], // Initial position
-          parameters: actionObj.params || {},
-        })
-      );
-
-      let fromNode = null;
-      if (actionObj.action.startsWith("if.")) {
-        // Special handling for IF nodes on false branches
-        if (actionObj.mode === "branch_false" && currentIfNode) {
-          // Connect this IF to the previous IF's false output
-          this.addConnection(workflow, currentIfNode, actionObj.action, 1, 0);
-        } else if (actionObj.mode === "sequential") {
-          fromNode = prevNodeName;
-        } else if (actionObj.mode === "parallel") {
-          fromNode = "Trigger";
-        }
-        currentIfNode = actionObj.action; // Set as current IF for subsequent branches
-      } else if (actionObj.mode === "branch_true" && currentIfNode) {
-        this.addConnection(workflow, currentIfNode, actionObj.action, 0, 0);
-      } else if (actionObj.mode === "branch_false" && currentIfNode) {
-        this.addConnection(workflow, currentIfNode, actionObj.action, 1, 0);
-      } else if (actionObj.mode === "sequential") {
-        fromNode = prevNodeName;
-      } else if (actionObj.mode === "parallel") {
-        fromNode = "Trigger";
-      }
-
-      if (fromNode) this.addConnection(workflow, fromNode, actionObj.action);
-
-      if (actionObj.mode === "sequential") {
-        prevNodeName = actionObj.action;
-      }
-
-      nodeId++;
-    }
-
-    // Use dagre for automatic layout
-    this.applyDagreLayout(workflow);
-
-    return workflow;
-  }
-
-  createNode({ id, name, type, position, parameters }) {
-    const typeVersion = type === "n8n-nodes-base.if" ? 2.2 : 1;
-
-    return {
-      id: `${id}`,
-      name,
-      type,
-      typeVersion,
-      position,
-      parameters,
-    };
-  }
-
-  addConnection(workflow, fromNode, toNode, outputIndex = 0, inputIndex = 0) {
-    if (!workflow.connections[fromNode]) {
-      workflow.connections[fromNode] = { main: [[]] };
-    }
-    if (!workflow.connections[fromNode].main[outputIndex]) {
-      workflow.connections[fromNode].main[outputIndex] = [];
-    }
-    workflow.connections[fromNode].main[outputIndex].push({
-      node: toNode,
-      type: "main",
-      index: inputIndex,
-    });
-  }
-
-  // Dynamic trigger node type mapping using enhanced catalog
-  getTriggerNodeType(trigger) {
-    // Extract service name (everything before first dot)
-    const serviceName = trigger.split(".")[0].toLowerCase();
-
-    // Handle schedule triggers
-    if (trigger.startsWith("schedule.")) {
-      const cronTrigger = getTriggerType("cron");
-      return cronTrigger || "n8n-nodes-base.cron";
-    }
-
-    // Try to get trigger type from enhanced catalog
-    const triggerType = getTriggerType(serviceName);
-    if (triggerType) {
-      return triggerType;
-    }
-
-    // Try with "trigger" suffix
-    const triggerWithSuffix = getTriggerType(serviceName + "trigger");
-    if (triggerWithSuffix) {
-      return triggerWithSuffix;
-    }
-
-    // Fallback to manual trigger
-    return "n8n-nodes-base.manualTrigger";
-  }
-
-  // Dynamic action node type mapping using enhanced catalog
-  getActionNodeType(action) {
-    // Extract service name (everything before first dot)
-    const serviceName = action.split(".")[0].toLowerCase();
-
-    // Handle special node types
-    if (action.startsWith("if.")) {
-      const ifAction = getActionType("if");
-      return ifAction || "n8n-nodes-base.if";
-    }
-
-    if (action.startsWith("wait")) {
-      const waitAction = getActionType("wait");
-      return waitAction || "n8n-nodes-base.wait";
-    }
-
-    // Try to get action type from enhanced catalog
-    const actionType = getActionType(serviceName);
-    if (actionType) {
-      return actionType;
-    }
-
-    // Use the dynamic node catalog as fallback
-    return this.nodeCatalog[serviceName] || "n8n-nodes-base.set";
-  }
-
+  /**
+   * Get all workflows
+   */
   async getAllWorkflows() {
     return await this.workflowDBService.getAllWorkflows();
   }
 
+  /**
+   * Get workflow by ID
+   */
   async getWorkflowById(id) {
     return await this.workflowDBService.getWorkflowById(id);
   }
 
+  /**
+   * Get workflows for specific user
+   */
   async getWorkflowsForUser(userId) {
     return await this.workflowDBService.getWorkflowsForUser(userId);
   }
 
+  /**
+   * Delete workflow
+   */
   async deleteWorkflow(id) {
     return await this.workflowDBService.deleteWorkflow(id);
   }
 
-  // Positioning methods
-  applyDagreLayout(workflow) {
-    const spacingX = 300;
-    const spacingY = 200;
+  /**
+   * Validate workflow structure
+   */
+  validateWorkflow(workflow) {
+    return this.workflowBuilderService.validateWorkflow(workflow);
+  }
 
-    // Build adjacency map
-    const adjacency = {};
-    Object.entries(workflow.connections).forEach(([fromNode, conn]) => {
-      conn.main?.forEach((outputs) => {
-        outputs.forEach((output) => {
-          if (!adjacency[fromNode]) adjacency[fromNode] = [];
-          adjacency[fromNode].push(output.node);
-        });
-      });
-    });
-
-    const positions = {};
-    const visited = new Set();
-
-    const placeNode = (node, depth, offsetY) => {
-      if (visited.has(node)) return;
-      visited.add(node);
-
-      positions[node] = [depth * spacingX, offsetY];
-
-      const children = adjacency[node] || [];
-      if (children.length === 1) {
-        placeNode(children[0], depth + 1, offsetY);
-      } else if (children.length > 1) {
-        // Spread branches vertically
-        const branchStartY = offsetY - ((children.length - 1) * spacingY) / 2;
-        children.forEach((child, i) =>
-          placeNode(child, depth + 1, branchStartY + i * spacingY)
-        );
-      }
-    };
-
-    // Start layout from Trigger
-    placeNode("Trigger", 0, 0);
-
-    // Apply positions to workflow
-    workflow.nodes.forEach((node) => {
-      if (positions[node.name]) {
-        node.position = positions[node.name];
-      }
-    });
+  /**
+   * Get workflow statistics
+   */
+  getWorkflowStats(workflow) {
+    return this.workflowBuilderService.getWorkflowStats(workflow);
   }
 }
 

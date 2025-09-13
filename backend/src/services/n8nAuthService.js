@@ -64,20 +64,19 @@ export async function createN8nWorkflow(apiKey, n8nUrl, workflowData) {
   );
 }
 
-/**
- * Activate/deactivate a workflow
- */
-export async function toggleN8nWorkflow(
-  apiKey,
-  n8nUrl,
-  workflowId,
-  active = true
-) {
-  return await callN8nWithApiKey(
-    apiKey,
-    n8nUrl,
-    `/workflows/${workflowId}/activate`,
-    "POST",
-    { active }
-  );
-}
+//   Activate/deactivate a workflow
+
+// export async function toggleN8nWorkflow(
+//   apiKey,
+//   n8nUrl,
+//   workflowId,
+//   active = true
+// ) {
+//   return await callN8nWithApiKey(
+//     apiKey,
+//     n8nUrl,
+//     `/workflows/${workflowId}/activate`,
+//     "POST",
+//     { active }
+//   );
+// }

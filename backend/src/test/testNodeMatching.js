@@ -1,4 +1,4 @@
-import { nodeMatchingService } from "../services/nodeMatchingService.js";
+import { nodeMatchingService } from "../services/workflow/nodeMatchingService.js";
 
 // Test the node matching service
 console.log("=== Testing Node Matching Service ===\n");

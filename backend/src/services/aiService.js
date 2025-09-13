@@ -3,7 +3,7 @@ import axios from "axios";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { nodeMatchingService } from "./nodeMatchingService.js";
+import { nodeMatchingService } from "./workflow/nodeMatchingService.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -165,6 +165,18 @@ You are an expert AI that converts any natural language workflow description int
   * Error Handling: If user mentions "if fails", "backup", "fallback"
   * Delays: If user mentions "wait", "after 5 minutes", add delay actions
   * Loops: If user mentions "for each", "repeat", add iteration logic
+
+
+  * For reports: Always include data aggregation and email distribution
+  * For summaries: Use openai nodes for data summarization with proper node naming (openai.summarize)
+
+- **CRITICAL: Specific Business Logic** - MANDATORY for detailed requirements:
+  * Location-based assignments: Use "function" nodes with location mapping logic
+    - Example: "US leads to John" = function with if/else logic for assignment
+  * Industry personalization: Use templated content with industry variables
+    - Example: "personalized by industry" = use industry-specific email templates
+  * Exact parameter values: Never use placeholders - implement the EXACT logic described
+    - Example: "lead score >80" = use exact numeric conditions not generic ones
 
 - Context Inference:
   * If user mentions "my", "me", "I" → infer personal automation
@@ -486,7 +498,7 @@ Output: {
   "trigger": "webhook.received",
   "actions": [
     {
-      "action": "openai.generate_text",
+      "action": "openai.summarize",
       "params": {
         "prompt": "Summarize the following data: {{$json.webhookData}}",
         "model": "gpt-3.5-turbo",
@@ -500,12 +512,26 @@ Output: {
       "params": {
         "to": "user@example.com",
         "subject": "Data Summary",
-        "message": "Summary: {{$node[\"OpenAI\"].json.output}}"
+        "message": "Summary: {{$node[\"openai.summarize\"].json.output}}"
       },
       "mode": "sequential"
     }
   ]
 }
+
+- **MANDATORY: Location-Based Assignment Pattern**
+  * When user mentions location assignment, ALWAYS use this exact pattern:
+  "action": "function.assign_sales_rep",
+  "params": {
+    "code": "return items.map(item => {\n  const location = (item.json.location || item.json.country || '').toLowerCase();\n  if (location.includes('us') || location.includes('united states')) {\n    item.json.salesRep = 'John';\n    item.json.salesRepEmail = 'john@company.com';\n  } else if (location.includes('eu') || location.includes('europe')) {\n    item.json.salesRep = 'Sarah';\n    item.json.salesRepEmail = 'sarah@company.com';\n  } else {\n    item.json.salesRep = 'Mike';\n    item.json.salesRepEmail = 'mike@company.com';\n  }\n  return item;\n});"
+  }
+
+- **MANDATORY: Industry Personalization Pattern**
+  * When user mentions industry customization, ALWAYS use this exact pattern:
+  "action": "function.personalize_content",
+  "params": {
+    "code": "return items.map(item => {\n  const industry = (item.json.industry || '').toLowerCase();\n  if (industry.includes('tech') || industry.includes('software')) {\n    item.json.emailSubject = 'Accelerate Your Tech Innovation';\n    item.json.emailContent = 'As a technology leader, you understand the importance of scalable solutions...';\n  } else if (industry.includes('healthcare') || industry.includes('medical')) {\n    item.json.emailSubject = 'HIPAA-Compliant Solutions for Healthcare';\n    item.json.emailContent = 'Healthcare organizations require secure, compliant systems...';\n  } else if (industry.includes('finance') || industry.includes('banking')) {\n    item.json.emailSubject = 'Enterprise-Grade Financial Solutions';\n    item.json.emailContent = 'Financial institutions need robust, secure platforms...';\n  } else {\n    item.json.emailSubject = 'Transform Your Business Operations';\n    item.json.emailContent = 'Every business deserves efficient, scalable solutions...';\n  }\n  return item;\n});"
+  }
 `;
 
   const body = {
@@ -515,7 +541,7 @@ Output: {
     contents: [{ role: "user", parts: [{ text: description }] }],
     generationConfig: {
       temperature: 0,
-      maxOutputTokens: 7096,
+      maxOutputTokens: 70096,
       responseMimeType: "application/json",
     },
   };

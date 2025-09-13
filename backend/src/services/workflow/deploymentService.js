@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
-import { createN8nWorkflow } from "./n8nAuthService.js";
-import { WorkflowBuilderService } from "./workflow/workflowBuilderService.js";
+import { createN8nWorkflow } from "../n8nAuthService.js";
+import { WorkflowBuilderService } from "./workflowBuilderService.js";
 
 dotenv.config();
 

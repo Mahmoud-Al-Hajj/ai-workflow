@@ -1,5 +1,5 @@
 import { UserService } from "../services/UserService.js";
-import { AuthService } from "../services/authService.js";
+import { AuthService } from "../services/auth/authService.js";
 
 export class UserController {
   constructor() {
