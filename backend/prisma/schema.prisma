@@ -13,6 +13,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+
 model User {
   id        Int      @id @default(autoincrement())
   name      String   // User's full name
@@ -25,6 +27,8 @@ model User {
 
   workflows Workflow[] // relation (1 user → many workflows)
 
+  @@index([role])
+  @@index([createdAt])
 }
 
 model Workflow {
@@ -39,4 +43,9 @@ model Workflow {
   // Relation to User
   userId Int
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([n8nWorkflowId])
+  @@index([createdAt])
 }
