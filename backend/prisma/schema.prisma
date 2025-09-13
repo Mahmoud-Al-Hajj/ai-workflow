@@ -20,6 +20,7 @@ model User {
   password  String
   n8nUrl    String   // User's n8n instance URL
   n8nApiKey String   // User's n8n API key
+  role     String   @default("user") // user or admin
   createdAt DateTime @default(now())
 
   workflows Workflow[] // relation (1 user → many workflows)
