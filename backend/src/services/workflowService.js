@@ -12,6 +12,13 @@ export class WorkflowService {
   }
 
   async createCompleteWorkflow({ description, userId, n8nUrl, n8nApiKey }) {
+    const startTime = Date.now();
+    logger.info("Starting workflow creation", {
+      userId,
+      description,
+      service: "WorkflowService",
+    });
+
     return await prisma.$transaction(async (tx) => {
       let workflowId = null;
       let n8nWorkflowId = null;
