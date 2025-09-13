@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import prisma from "../lib/prisma.js";
+import { logger } from "../utils/logger.js";
 
 dotenv.config();
 
@@ -15,11 +16,23 @@ export async function authMiddleware(req, res, next) {
       where: { id: decoded.userId },
     });
     if (!user) return res.status(401).json({ error: "Invalid token" });
+    logger.debug("User authenticated successfully", {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      ip: req.ip,
+      service: "AuthMiddleware",
+    });
 
     req.user = user;
     next();
   } catch (err) {
-    res.status(401).json({ error: "Unauthorized" });
+    logger.error("User authentication failed", {
+      error: err.message,
+      stack: err.stack,
+      service: "AuthMiddleware",
+    });
+    res.status(400).json({ error: "Invalid token" });
   }
 }
 

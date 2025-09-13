@@ -3,6 +3,7 @@ import { WorkflowDatabaseService } from "./database/workflowDBService.js";
 import { deployWorkflow } from "./workflow/deploymentService.js";
 import { WorkflowBuilderService } from "./workflow/workflowBuilderService.js";
 import { AIResponseValidator } from "../utils/AIResponseValidator.js";
+import { logger } from "../utils/logger.js";
 import prisma from "../lib/prisma.js";
 
 export class WorkflowService {
@@ -24,8 +25,10 @@ export class WorkflowService {
       let n8nWorkflowId = null;
 
       try {
+        logger.debug("Generating AI workflow JSON", { userId });
         const aiWorkflowJson = await getUserJsonFromEnglish(description);
 
+        logger.debug("Validating AI response", { userId });
         const validation =
           AIResponseValidator.validateAIWorkflowResponse(aiWorkflowJson);
         if (!validation.isValid) {
@@ -34,10 +37,12 @@ export class WorkflowService {
           );
         }
 
+        logger.debug("Building n8n workflow", { userId });
         const n8nWorkflow =
           this.workflowBuilderService.buildWorkflow(aiWorkflowJson);
         console.log(JSON.stringify(n8nWorkflow, null, 2));
 
+        logger.debug("Creating workflow in database", { userId });
         const savedWorkflow = await this.workflowDBService.createWorkflow(
           {
             name: description.substring(0, 50) + "...",
@@ -47,10 +52,17 @@ export class WorkflowService {
           tx
         );
         workflowId = savedWorkflow.id;
+        logger.info("Workflow created in database", { userId, workflowId });
 
+        logger.debug("Deploying workflow to n8n", { userId, workflowId });
         // Deploy to n8n using AI JSON (deployWorkflow builds internally)
         n8nWorkflowId = await deployWorkflow(aiWorkflowJson, n8nApiKey, n8nUrl);
 
+        logger.info("Workflow deployed to n8n", {
+          userId,
+          workflowId,
+          n8nWorkflowId,
+        });
         // Step 5: Update workflow with n8n ID and mark as ACTIVE
         await this.workflowDBService.updateWorkflow(
           workflowId,
@@ -60,6 +72,14 @@ export class WorkflowService {
           },
           tx
         );
+        const duration = Date.now() - startTime;
+        logger.info("Workflow creation completed successfully", {
+          userId,
+          workflowId,
+          n8nWorkflowId,
+          duration,
+          service: "WorkflowService",
+        });
         return {
           databaseWorkflow: savedWorkflow,
           n8nWorkflowId,
@@ -67,6 +87,16 @@ export class WorkflowService {
           n8nWorkflow,
         };
       } catch (error) {
+        const duration = Date.now() - startTime;
+        logger.error("Workflow creation failed", {
+          userId,
+          workflowId,
+          n8nWorkflowId,
+          error: error.message,
+          stack: error.stack,
+          duration,
+          service: "WorkflowService",
+        });
         throw new Error(`Failed to create complete workflow: ${error.message}`);
       }
     });

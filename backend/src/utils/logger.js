@@ -36,6 +36,9 @@ const logger = winston.createLogger({
       filename: path.join("logs", "logs/error.log"),
       level: "error",
     }),
+    new winston.transports.File({
+      filename: path.join("logs", "logs/combined.log"),
+    }),
     // Security audit log
     new winston.transports.File({
       filename: path.join("logs", "logs/security.log"),
