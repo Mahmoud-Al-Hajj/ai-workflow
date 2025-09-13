@@ -40,9 +40,9 @@ class PositioningService {
         layoutState.parallelY += this.GRID_SIZE_Y;
         return parallelPos;
       case "branch_true":
-        return [layoutState.sequentialX, layoutState.sequentialY - 150];
+        return [layoutState.sequentialX, layoutState.sequentialY - 100];
       case "branch_false":
-        return [layoutState.sequentialX, layoutState.sequentialY + 150];
+        return [layoutState.sequentialX, layoutState.sequentialY + 100];
       default:
         return [layoutState.sequentialX, layoutState.sequentialY];
     }
@@ -73,11 +73,11 @@ class PositioningService {
     dagreGraph.setGraph({
       rankdir: "LR", // Left to Right layout (good for workflows)
       align: "UL", // Upper Left alignment
-      nodesep: 100, // Horizontal separation between nodes
-      edgesep: 50, // Separation between edges
-      ranksep: 150, // Separation between ranks (vertical levels)
-      marginx: 50, // Graph margin
-      marginy: 50,
+      nodesep: 70, // Horizontal separation between nodes
+      edgesep: 30, // Separation between edges
+      ranksep: 100, // Separation between ranks (vertical levels)
+      marginx: 40, // Graph margin
+      marginy: 40,
     });
 
     // Add all nodes to the graph
@@ -134,11 +134,11 @@ class PositioningService {
     dagreGraph.setGraph({
       rankdir: "LR", // Left to Right (workflow style)
       align: "UL", // Upper Left alignment
-      nodesep: 120, // More space between nodes horizontally
-      edgesep: 80, // More space between parallel edges
-      ranksep: 200, // More space between sequential levels
-      marginx: 100, // Graph margins
-      marginy: 100,
+      nodesep: 60, // Reduced space between nodes horizontally
+      edgesep: 40, // Reduced space between parallel edges
+      ranksep: 120, // Reduced space between sequential levels
+      marginx: 50, // Reduced graph margins
+      marginy: 50,
       acyclicer: "greedy", // Handle cycles in complex workflows
       ranker: "tight-tree", // Better ranking algorithm
     });
@@ -234,7 +234,7 @@ class PositioningService {
    * Ensure no nodes are too close to each other
    */
   enforceMinimumSpacing(workflow) {
-    const MIN_DISTANCE = 120;
+    const MIN_DISTANCE = 80; // Reduced minimum distance
 
     for (let i = 0; i < workflow.nodes.length; i++) {
       for (let j = i + 1; j < workflow.nodes.length; j++) {

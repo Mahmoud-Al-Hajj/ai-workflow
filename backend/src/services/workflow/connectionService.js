@@ -3,13 +3,8 @@ export class ConnectionService {
     this.reset();
   }
 
-  /**
-   * Reset connection state for new workflow
-   */
   reset() {
-    // Clear connection state for new workflow
     this.connections = {};
-
     // Chain heads - track the last node in each execution path
     this.state = {
       mainChain: "Trigger", // Main sequential flow
@@ -35,10 +30,9 @@ export class ConnectionService {
     });
   }
 
-  /**
-   * Helper method to find connection source for branch nodes (true/false paths)
-   * Used by both IF nodes and action nodes for consistent branch handling
-   */
+  // Helper method to find connection source for branch nodes (true/false paths)
+  // Used by both IF nodes and action nodes for consistent branch handling
+
   findBranchConnection(isTrueBranch) {
     const branchChain = isTrueBranch
       ? this.state.trueBranchChain
