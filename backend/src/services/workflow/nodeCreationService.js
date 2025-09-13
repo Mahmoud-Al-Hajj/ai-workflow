@@ -1,13 +1,8 @@
-/**
- * NodeCreationService - Handles node instantiation, naming, and type mapping
- *
- * Responsibilities:
- * - Create n8n node objects with proper structure
- * - Ensure unique node names
- * - Map action strings to n8n node types
- * - Handle node parameters and positioning
- */
-import { getTriggerType, getActionType } from "../catalogService.js";
+import {
+  getTriggerType,
+  getActionType,
+  getAllNodeTemplates,
+} from "../catalogService.js";
 
 export class NodeCreationService {
   constructor() {
@@ -15,17 +10,11 @@ export class NodeCreationService {
     this.nodeId = 1;
   }
 
-  /**
-   * Reset state for new workflow
-   */
   reset() {
     this.usedNodeNames = new Set(["Trigger"]);
     this.nodeId = 1;
   }
 
-  /**
-   * Create a complete n8n node object
-   */
   createNode({ name, type, position, parameters }) {
     const node = {
       id: this.nodeId.toString(),
@@ -40,9 +29,6 @@ export class NodeCreationService {
     return node;
   }
 
-  /**
-   * Generate unique node name from base action name
-   */
   ensureUniqueNodeName(baseName) {
     let uniqueName = baseName;
     let counter = 2;
@@ -56,54 +42,47 @@ export class NodeCreationService {
     return uniqueName;
   }
 
-  /**
-   * Get n8n node type for trigger
-   */
   getTriggerNodeType(trigger) {
-    // Extract service name (everything before first dot)
     const serviceName = trigger.split(".")[0].toLowerCase();
+    if (!serviceName) return "n8n-nodes-base.manualTrigger";
 
-    // Handle schedule triggers
     if (trigger.startsWith("schedule.")) {
       const cronTrigger = getTriggerType("cron");
       return cronTrigger || "n8n-nodes-base.cron";
     }
 
-    // Try to get trigger type from enhanced catalog
     const triggerType = getTriggerType(serviceName);
-    if (triggerType) {
+    if (this.validateTrigger(triggerType)) {
       return triggerType;
     }
 
     // Try with "trigger" suffix
     const triggerWithSuffix = getTriggerType(serviceName + "trigger");
-    if (triggerWithSuffix) {
+    if (this.validateTrigger(triggerWithSuffix)) {
       return triggerWithSuffix;
     }
 
     return "n8n-nodes-base.manualTrigger";
   }
 
-  getActionNodeType(action) {
-    // Extract service name (everything before first dot)
-    const serviceName = action.split(".")[0].toLowerCase();
+  validateTrigger(triggerType) {
+    if (!triggerType) return false;
+    const catalog = getAllNodeTemplates();
+    return Object.values(catalog).some((node) => node.trigger === triggerType);
+  }
 
-    // Handle IF nodes specially
+  getActionNodeType(action) {
+    const serviceName = action.split(".")[0].toLowerCase();
     if (action.startsWith("if.")) {
       return "n8n-nodes-base.if";
     }
-
-    // Handle HTTP request nodes
     if (action.startsWith("httprequest.")) {
       return "n8n-nodes-base.httpRequest";
     }
-
-    // Handle wait/delay nodes
     if (action.startsWith("wait.") || action.startsWith("delay.")) {
       return "n8n-nodes-base.wait";
     }
 
-    // Try to get action type from enhanced catalog
     const actionType = getActionType(serviceName);
     if (actionType) {
       return actionType;
@@ -143,9 +122,6 @@ export class NodeCreationService {
     return typeVersionMap[nodeType] || 1;
   }
 
-  /**
-   * Create trigger node
-   */
   createTriggerNode(trigger, triggerParams) {
     return this.createNode({
       name: "Trigger",
@@ -154,21 +130,11 @@ export class NodeCreationService {
       parameters: triggerParams || {},
     });
   }
-
-  /**
-   * Create action node with unique naming
-   */
   createActionNode(actionObj, position) {
     const nodeType = this.getActionNodeType(actionObj.action);
     const uniqueNodeName = this.ensureUniqueNodeName(actionObj.action);
 
-    // Special handling for function nodes
-    if (
-      nodeType === "n8n-nodes-base.function" &&
-      actionObj.params &&
-      actionObj.params.code
-    ) {
-      // Ensure function code is properly set and any special parameters are included
+    if (nodeType === "n8n-nodes-base.function") {
       return {
         node: this.createNode({
           name: uniqueNodeName,

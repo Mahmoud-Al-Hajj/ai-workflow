@@ -547,9 +547,9 @@
   },
   "form": {
     "action": null,
-    "trigger": "n8n-nodes-base.formtrigger",
-    "displayName": "FormTrigger",
-    "description": "",
+    "trigger": "n8n-nodes-base.webhook",
+    "displayName": "Webhook",
+    "description": "Webhook trigger for form submissions",
     "group": []
   },
   "formio": {
