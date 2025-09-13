@@ -3,7 +3,7 @@ import { WorkflowDatabaseService } from "./database/workflowDBService.js";
 import { deployWorkflow } from "./workflow/deploymentService.js";
 import { WorkflowBuilderService } from "./workflow/workflowBuilderService.js";
 import { AIResponseValidator } from "../utils/AIResponseValidator.js";
-import { logger } from "../utils/logger.js";
+import logger from "../utils/logger.js";
 import prisma from "../lib/prisma.js";
 
 export class WorkflowService {
