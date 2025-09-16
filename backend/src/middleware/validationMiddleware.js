@@ -5,8 +5,8 @@ export const validateCreateWorkflow = [
   body("description")
     .isString()
     .notEmpty()
-    .isLength({ min: 10, max: 1000 })
-    .withMessage("Description must be 10-1000 characters"),
+    .isLength({ min: 10 })
+    .withMessage("Description must be at least 10 characters"),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

@@ -20,86 +20,105 @@ export class WorkflowService {
       service: "WorkflowService",
     });
 
-    return await prisma.$transaction(async (tx) => {
-      let workflowId = null;
-      let n8nWorkflowId = null;
+    return await prisma.$transaction(
+      async (tx) => {
+        let workflowId = null;
+        let n8nWorkflowId = null;
 
-      try {
-        logger.debug("Generating AI workflow JSON", { userId });
-        const aiWorkflowJson = await getUserJsonFromEnglish(description);
+        try {
+          logger.debug("Generating AI workflow JSON", { userId });
+          const aiWorkflowJson = await getUserJsonFromEnglish(description);
 
-        logger.debug("Validating AI response", { userId });
-        const validation =
-          AIResponseValidator.validateAIWorkflowResponse(aiWorkflowJson);
-        if (!validation.isValid) {
+          logger.debug("Validating AI response", { userId });
+          const validation =
+            AIResponseValidator.validateAIWorkflowResponse(aiWorkflowJson);
+          if (!validation.isValid) {
+            throw new Error(
+              `AI response validation failed: ${validation.errors.join(", ")}`
+            );
+          }
+
+          logger.debug("Building n8n workflow", { userId });
+          const n8nWorkflow =
+            this.workflowBuilderService.buildWorkflow(aiWorkflowJson);
+          console.log(JSON.stringify(n8nWorkflow, null, 2));
+
+          // 1. Create workflow in DB (PENDING) inside a transaction
+          const savedWorkflow = await prisma.$transaction(
+            async (tx) => {
+              return await this.workflowDBService.createWorkflow(
+                {
+                  name: description.substring(0, 50) + "...",
+                  data: n8nWorkflow,
+                  userId: Number(userId), //la et2akad enu keef ma nb3tt rej3a integer
+                },
+                tx
+              );
+            },
+            { timeout: 30000 }
+          );
+          workflowId = savedWorkflow.id;
+          logger.info("Workflow created in database", { userId, workflowId });
+
+          // 2. Deploy to n8n (external call, outside transaction)
+          logger.debug("Deploying workflow to n8n", { userId, workflowId });
+          n8nWorkflowId = await deployWorkflow(
+            aiWorkflowJson,
+            n8nApiKey,
+            n8nUrl
+          );
+
+          logger.info("Workflow deployed to n8n", {
+            userId,
+            workflowId,
+            n8nWorkflowId,
+          });
+          // 3. Update workflow in DB with n8n ID and status ACTIVE (new transaction)
+          await prisma.$transaction(
+            async (tx) => {
+              await this.workflowDBService.updateWorkflow(
+                workflowId,
+                {
+                  n8nWorkflowId: n8nWorkflowId,
+                  status: "ACTIVE",
+                },
+                tx
+              );
+            },
+            { timeout: 30000 }
+          );
+          const duration = Date.now() - startTime;
+          logger.info("Workflow creation completed successfully", {
+            userId,
+            workflowId,
+            n8nWorkflowId,
+            duration,
+            service: "WorkflowService",
+          });
+          return {
+            databaseWorkflow: savedWorkflow,
+            n8nWorkflowId,
+            aiWorkflowJson,
+            n8nWorkflow,
+          };
+        } catch (error) {
+          const duration = Date.now() - startTime;
+          logger.error("Workflow creation failed", {
+            userId,
+            workflowId,
+            n8nWorkflowId,
+            error: error.message,
+            stack: error.stack,
+            duration,
+            service: "WorkflowService",
+          });
           throw new Error(
-            `AI response validation failed: ${validation.errors.join(", ")}`
+            `Failed to create complete workflow: ${error.message}`
           );
         }
-
-        logger.debug("Building n8n workflow", { userId });
-        const n8nWorkflow =
-          this.workflowBuilderService.buildWorkflow(aiWorkflowJson);
-        console.log(JSON.stringify(n8nWorkflow, null, 2));
-
-        logger.debug("Creating workflow in database", { userId });
-        const savedWorkflow = await this.workflowDBService.createWorkflow(
-          {
-            name: description.substring(0, 50) + "...",
-            data: n8nWorkflow,
-            userId: Number(userId), //la et2akad enu keef ma nb3tt rej3a integer
-          },
-          tx
-        );
-        workflowId = savedWorkflow.id;
-        logger.info("Workflow created in database", { userId, workflowId });
-
-        logger.debug("Deploying workflow to n8n", { userId, workflowId });
-        // Deploy to n8n using AI JSON (deployWorkflow builds internally)
-        n8nWorkflowId = await deployWorkflow(aiWorkflowJson, n8nApiKey, n8nUrl);
-
-        logger.info("Workflow deployed to n8n", {
-          userId,
-          workflowId,
-          n8nWorkflowId,
-        });
-        // Step 5: Update workflow with n8n ID and mark as ACTIVE
-        await this.workflowDBService.updateWorkflow(
-          workflowId,
-          {
-            n8nWorkflowId: n8nWorkflowId,
-            status: "ACTIVE",
-          },
-          tx
-        );
-        const duration = Date.now() - startTime;
-        logger.info("Workflow creation completed successfully", {
-          userId,
-          workflowId,
-          n8nWorkflowId,
-          duration,
-          service: "WorkflowService",
-        });
-        return {
-          databaseWorkflow: savedWorkflow,
-          n8nWorkflowId,
-          aiWorkflowJson,
-          n8nWorkflow,
-        };
-      } catch (error) {
-        const duration = Date.now() - startTime;
-        logger.error("Workflow creation failed", {
-          userId,
-          workflowId,
-          n8nWorkflowId,
-          error: error.message,
-          stack: error.stack,
-          duration,
-          service: "WorkflowService",
-        });
-        throw new Error(`Failed to create complete workflow: ${error.message}`);
-      }
-    });
+      },
+      { timeout: 30000 }
+    );
   }
 
   async getAllWorkflows() {

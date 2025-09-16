@@ -74,8 +74,8 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-app.use(requestLogger);
 app.use(compression());
+app.use(express.json({ limit: "15mb" }));
 app.use(limiter);
 
 // Routes
