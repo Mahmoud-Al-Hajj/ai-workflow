@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
 import logger from "./utils/logger.js";
-// Import your routes
+import compression from "compression";
 import userRoutes from "./routes/userRoutes.js";
 import workflowRoutes from "./routes/workflowRoutes.js";
 
@@ -65,7 +65,6 @@ const requestLogger = (req, res, next) => {
   next();
 };
 
-// Middleware
 app.use(helmet()); // Security headers
 app.use(
   cors({
@@ -75,7 +74,8 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-app.use(requestLogger); // Log all requests
+app.use(requestLogger);
+app.use(compression());
 app.use(limiter);
 
 // Routes
@@ -99,7 +99,7 @@ app.get("/health", (req, res) => {
     memory: process.memoryUsage(),
   });
 });
-//handling 404 (route not found).
+
 app.use((req, res) => {
   logger.warn("Route not found", {
     method: req.method,
@@ -115,7 +115,6 @@ app.use((req, res) => {
   });
 });
 
-// handling all other errors
 app.use((err, req, res, next) => {
   logger.error("Unhandled error", {
     error: err.message,
