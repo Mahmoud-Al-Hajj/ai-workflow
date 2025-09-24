@@ -14,111 +14,132 @@ export class WorkflowService {
 
   async createCompleteWorkflow({ description, userId, n8nUrl, n8nApiKey }) {
     const startTime = Date.now();
-    logger.info("Starting workflow creation", {
+    logger.info("Starting workflow creation (background processing)", {
       userId,
       description,
       service: "WorkflowService",
     });
 
-    return await prisma.$transaction(
-      async (tx) => {
-        let workflowId = null;
-        let n8nWorkflowId = null;
+    // Step 1: Create PENDING workflow record
+    const savedWorkflow = await this.workflowDBService.createWorkflow({
+      name: description.substring(0, 50) + "...",
+      data: null,
+      userId: Number(userId),
+      status: "PENDING",
+    });
 
-        try {
-          logger.debug("Generating AI workflow JSON", { userId });
-          const aiWorkflowJson = await getUserJsonFromEnglish(description);
+    logger.info("Workflow created in database (PENDING)", {
+      userId,
+      workflowId: savedWorkflow.id,
+    });
 
-          logger.debug("Validating AI response", { userId });
-          const validation =
-            AIResponseValidator.validateAIWorkflowResponse(aiWorkflowJson);
-          if (!validation.isValid) {
-            throw new Error(
-              `AI response validation failed: ${validation.errors.join(", ")}`
-            );
-          }
+    // Step 2: Start background
+    setImmediate(async () => {
+      const bgStartTime = Date.now();
+      let aiWorkflowJson = null;
+      let n8nWorkflowId = null;
 
-          logger.debug("Building n8n workflow", { userId });
-          const n8nWorkflow =
-            this.workflowBuilderService.buildWorkflow(aiWorkflowJson);
-          console.log(JSON.stringify(n8nWorkflow, null, 2));
+      try {
+        logger.info("Background: Generating AI workflow JSON", {
+          userId,
+          workflowId: savedWorkflow.id,
+        });
+        const aiStart = Date.now();
+        aiWorkflowJson = await getUserJsonFromEnglish(description);
+        const aiDuration = Date.now() - aiStart;
 
-          // 1. Create workflow in DB (PENDING) inside a transaction
-          const savedWorkflow = await prisma.$transaction(
-            async (tx) => {
-              return await this.workflowDBService.createWorkflow(
-                {
-                  name: description.substring(0, 50) + "...",
-                  data: n8nWorkflow,
-                  userId: Number(userId), //la et2akad enu keef ma nb3tt rej3a integer
-                },
-                tx
-              );
-            },
-            { timeout: 30000 }
-          );
-          workflowId = savedWorkflow.id;
-          logger.info("Workflow created in database", { userId, workflowId });
+        logger.info("AI workflow JSON generated", {
+          userId,
+          workflowId: savedWorkflow.id,
+          aiDuration,
+        });
 
-          // 2. Deploy to n8n (external call, outside transaction)
-          logger.debug("Deploying workflow to n8n", { userId, workflowId });
-          n8nWorkflowId = await deployWorkflow(
-            aiWorkflowJson,
-            n8nApiKey,
-            n8nUrl
-          );
-
-          logger.info("Workflow deployed to n8n", {
-            userId,
-            workflowId,
-            n8nWorkflowId,
-          });
-          // 3. Update workflow in DB with n8n ID and status ACTIVE (new transaction)
-          await prisma.$transaction(
-            async (tx) => {
-              await this.workflowDBService.updateWorkflow(
-                workflowId,
-                {
-                  n8nWorkflowId: n8nWorkflowId,
-                  status: "ACTIVE",
-                },
-                tx
-              );
-            },
-            { timeout: 30000 }
-          );
-          const duration = Date.now() - startTime;
-          logger.info("Workflow creation completed successfully", {
-            userId,
-            workflowId,
-            n8nWorkflowId,
-            duration,
-            service: "WorkflowService",
-          });
-          return {
-            databaseWorkflow: savedWorkflow,
-            n8nWorkflowId,
-            aiWorkflowJson,
-            n8nWorkflow,
-          };
-        } catch (error) {
-          const duration = Date.now() - startTime;
-          logger.error("Workflow creation failed", {
-            userId,
-            workflowId,
-            n8nWorkflowId,
-            error: error.message,
-            stack: error.stack,
-            duration,
-            service: "WorkflowService",
-          });
+        // Validation
+        const validation =
+          AIResponseValidator.validateAIWorkflowResponse(aiWorkflowJson);
+        if (!validation.isValid) {
           throw new Error(
-            `Failed to create complete workflow: ${error.message}`
+            `AI response validation failed: ${validation.errors.join(", ")}`
           );
         }
-      },
-      { timeout: 30000 }
-    );
+
+        // Build n8n workflow
+        const n8nWorkflow =
+          this.workflowBuilderService.buildWorkflow(aiWorkflowJson);
+
+        // Update with generated workflow data
+        await this.workflowDBService.updateWorkflow(savedWorkflow.id, {
+          data: n8nWorkflow,
+        });
+
+        // Deploy to n8n (~5 seconds)
+        logger.info("Background: Deploying to n8n", {
+          userId,
+          workflowId: savedWorkflow.id,
+        });
+        const deployStart = Date.now();
+        n8nWorkflowId = await deployWorkflow(aiWorkflowJson, n8nApiKey, n8nUrl);
+        const deployDuration = Date.now() - deployStart;
+
+        logger.info("Workflow deployed to n8n", {
+          userId,
+          workflowId: savedWorkflow.id,
+          n8nWorkflowId,
+          deployDuration,
+        });
+
+        // Mark as ACTIVE
+        await this.workflowDBService.updateWorkflow(savedWorkflow.id, {
+          n8nWorkflowId,
+          status: "ACTIVE",
+        });
+
+        const totalDuration = Date.now() - bgStartTime;
+        logger.info("Background workflow processing completed", {
+          userId,
+          workflowId: savedWorkflow.id,
+          n8nWorkflowId,
+          totalDuration,
+          aiDuration,
+          deployDuration,
+        });
+      } catch (error) {
+        logger.error("Background workflow processing failed", {
+          userId,
+          workflowId: savedWorkflow.id,
+          error: error.message,
+          stack: error.stack,
+          duration: Date.now() - bgStartTime,
+        });
+
+        // Mark as FAILED
+        try {
+          await this.workflowDBService.updateWorkflow(savedWorkflow.id, {
+            status: "FAILED",
+            error: error.message,
+          });
+        } catch (updateError) {
+          logger.error("Failed to update workflow status to FAILED", {
+            workflowId: savedWorkflow.id,
+            error: updateError.message,
+          });
+        }
+      }
+    });
+
+    // Step 3: Return immediately with PENDING workflow
+    const duration = Date.now() - startTime;
+    logger.info("Workflow creation initiated (background processing started)", {
+      userId,
+      workflowId: savedWorkflow.id,
+      duration,
+    });
+
+    return {
+      databaseWorkflow: savedWorkflow,
+      status: "PENDING",
+      message: "Workflow creation started. Processing in background.",
+    };
   }
 
   async getAllWorkflows() {
