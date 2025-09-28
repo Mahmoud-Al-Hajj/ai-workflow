@@ -1,11 +1,84 @@
-.chat-container {
-  height: 100%;
+.create-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(45deg, #02182b, #0a1a2e, #02182b);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+.create-card {
+  background: linear-gradient(
+    135deg,
+    rgba(2, 24, 43, 0.9) 0%,
+    rgba(26, 37, 48, 0.9) 100%
+  );
+  color: white;
+  padding: 2rem;
+  margin: 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  max-width: 700px;
+  width: 100%;
+  transition: transform 0.3s ease;
+}
+.create-card:hover {
+  transform: translateY(-5px);
+}
+.create-form {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 1rem;
+}
+.form-textarea {
+  padding: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  font-size: 1rem;
+  resize: vertical;
+  min-height: 120px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: #d7263d;
+  box-shadow: 0 0 0 3px rgba(215, 38, 61, 0.2);
+}
+
+.form-textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+.form-label {
+  font-weight: bold;
   color: white;
 }
-.small-text {
+.form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.char-count {
   font-size: 0.9rem;
-  color: #ccc;
+  color: rgba(255, 255, 255, 0.7);
+}
+.error-text {
+  color: #d7263d;
+  font-size: 0.9rem;
 }

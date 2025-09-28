@@ -58,17 +58,16 @@
 .primary-btn {
   background: var(--color-crimson);
   color: var(--color-white);
-  border: 2px solid var(--color-crimson);
 }
 .primary-btn:hover {
-  background: #b71c30;
+  background: rgb(219, 32, 57);
 }
 
-.secondary-btn {
-  background: #032746;
+.btn {
+  background: #032750;
   border-color: #02182b;
 }
-.secondary-btn:hover {
+.btn:hover {
   background: #053c6b;
 }
 .section-title {

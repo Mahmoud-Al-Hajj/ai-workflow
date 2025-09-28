@@ -5,7 +5,6 @@ import "../styles/Home.css";
 function Home() {
   return (
     <>
-      {/* Full-bleed hero (not inside container) */}
       <section className="hero-bleed">
         <h1>Workflow automation, supercharged by AI</h1>
         <p>
@@ -18,7 +17,7 @@ function Home() {
           <Link to="/get-started" className="primary-btn">
             Get started
           </Link>
-          <Link to="/features" className="secondary-btn">
+          <Link to="/features" className="btn">
             Features
           </Link>
         </div>
