@@ -1,0 +1,77 @@
+/* src/styles/theme.css */
+/* Global design tokens using Crimson and Nights colors */
+:root {
+  --color-crimson: #d7263d; /* primary */
+  --color-nights: #02182b; /* background / dark */
+  --color-white: #ffffff;
+  --color-muted: #9aa6b2;
+
+  --font-sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
+
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  --radius-sm: 8px;
+  --shadow-sm: 0 6px 18px rgba(2, 24, 43, 0.08);
+  --container-max: 1100px;
+}
+
+/* Global resets and base styles */
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--color-nights); /* set background to Nights */
+  color: var(--color-white); /* default text color on dark bg */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.45;
+}
+
+/* Container helper */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-md);
+  padding-right: var(--space-md);
+}
+
+/* Utility classes */
+.flex {
+  display: flex;
+}
+.items-center {
+  align-items: center;
+}
+.justify-between {
+  justify-content: space-between;
+}
+
+/* Buttons base (components may override) */
+.btn {
+  font-weight: 700;
+}
+
+/* Ensure links inherit color by default on dark bg */
+a {
+  color: inherit;
+}
+
+@media (max-width: 880px) {
+  .container {
+    padding-left: var(--space-sm);
+    padding-right: var(--space-sm);
+  }
+}

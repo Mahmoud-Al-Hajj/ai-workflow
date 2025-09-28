@@ -1,0 +1,138 @@
+/* src/styles/Home.css */
+.home-container {
+  font-family: Arial, sans-serif;
+  max-width: 1000px;
+  width: 92%;
+  margin: 50px auto;
+  padding: 20px;
+  text-align: center;
+  box-sizing: border-box;
+  color: var(--color-white);
+}
+
+.hero-bleed {
+  padding: 64px 20px;
+  background: linear-gradient(
+    90deg,
+    rgba(2, 24, 43, 0.98),
+    rgba(2, 24, 43, 0.9)
+  );
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  text-align: center;
+  margin-bottom: 32px;
+}
+.hero-bleed h1 {
+  font-size: 2.6rem;
+  color: var(--color-white);
+  margin: 0 0 12px 0;
+  width: 100%;
+}
+.hero-bleed p {
+  font-size: 1.05rem;
+  color: var(--color-muted);
+  width: 100%;
+  margin-bottom: 18px;
+}
+
+.hero-bleed .cta-buttons {
+  justify-content: center;
+}
+
+.cta-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.primary-btn,
+.secondary-btn {
+  padding: 12px 22px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+.primary-btn {
+  background: var(--color-crimson);
+  color: var(--color-white);
+  border: 2px solid var(--color-crimson);
+}
+.primary-btn:hover {
+  background: #b71c30;
+}
+
+.secondary-btn {
+  background: #032746;
+  border-color: #02182b;
+}
+.secondary-btn:hover {
+  background: #053c6b;
+}
+.section-title {
+  text-align: center;
+  font-size: 1.9rem;
+  color: #ffffff;
+  margin-bottom: 2rem;
+  position: relative;
+}
+.section-title:after {
+  content: "";
+  display: block;
+  width: 80px;
+  height: 3px;
+  background: #dc143c; /* crimson */
+  margin: 12px auto 0;
+}
+
+.steps-container {
+  display: flex;
+  gap: 1.25rem;
+  justify-content: space-between;
+}
+.step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* simplified shadow */
+  transition: transform 0.2s ease;
+  color: #02182b; /* nights */
+}
+.step:hover {
+  transform: translateY(-6px);
+}
+.step-number {
+  width: 48px;
+  height: 48px;
+  background: #dc143c; /* crimson */
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  margin-bottom: 12px;
+}
+.step-content h3 {
+  color: #02182b;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+.step-content p {
+  color: #666666; /* muted */
+  font-size: 0.95rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+@media (max-width: 880px) {
+  .steps-container {
+    flex-direction: column;
+  }
+}

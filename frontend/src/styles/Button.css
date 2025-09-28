@@ -1,0 +1,58 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  border: 0;
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+/* Primary */
+.primary-btn {
+  background: var(--color-crimson);
+  color: var(--color-white);
+  box-shadow: var(--shadow-sm);
+}
+.primary-btn:hover {
+  background: #b71c30;
+  transform: translateY(-2px);
+}
+
+/* Secondary (outline) */
+.secondary-btn {
+  background: var(--color-white);
+  color: var(--color-nights);
+  border: 2px solid rgba(2, 24, 43, 0.06);
+}
+.secondary-btn:hover {
+  background: rgba(2, 24, 43, 0.04);
+}
+
+/* Ghost (text link style) */
+.ghost-btn {
+  background: transparent;
+  color: var(--color-nights);
+  padding: 8px 10px;
+}
+.ghost-btn:hover {
+  background: rgba(2, 24, 43, 0.03);
+}
+
+/* Disabled */
+.btn[disabled],
+.btn[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  pointer-events: none;
+}
+
+/* Focus */
+.btn:focus {
+  outline: 3px solid rgba(215, 38, 61, 0.16);
+  outline-offset: 2px;
+}

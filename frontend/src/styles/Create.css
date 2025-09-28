@@ -1,0 +1,11 @@
+.chat-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+}
+.small-text {
+  font-size: 0.9rem;
+  color: #ccc;
+}
