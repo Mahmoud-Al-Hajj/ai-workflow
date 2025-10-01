@@ -8,7 +8,7 @@ function Home() {
       <section className="hero-bleed">
         <div className="hero-content">
           <div className="hero-badge">
-            <span>Powered by AI</span>
+            <span>Designed for n8n</span>
           </div>
 
           <h1>
@@ -35,7 +35,7 @@ function Home() {
           <div className="hero-stats">
             <div className="stat">
               <span className="stat-number">590+</span>
-              <span className="stat-label">Integrations</span>
+              <span className="stat-label">Nodes</span>
             </div>
             <div className="stat">
               <span className="stat-number">more than 80%</span>
