@@ -72,7 +72,7 @@ export class WorkflowService {
           data: n8nWorkflow,
         });
 
-        // Deploy to n8n (~5 seconds)
+        // Deploy to n8n
         logger.info("Background: Deploying to n8n", {
           userId,
           workflowId: savedWorkflow.id,
@@ -108,7 +108,6 @@ export class WorkflowService {
           userId,
           workflowId: savedWorkflow.id,
           error: error.message,
-          stack: error.stack,
           duration: Date.now() - bgStartTime,
         });
 
