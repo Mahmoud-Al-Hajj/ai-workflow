@@ -18,7 +18,11 @@ export class WorkflowDatabaseService {
   }
 
   async getWorkflowById(id) {
-    return prisma.workflow.findUnique({ where: { id: parseInt(id) } });
+    const numId = parseInt(id, 10);
+    if (isNaN(numId) || numId <= 0) {
+      throw new Error("Invalid workflow ID");
+    }
+    return prisma.workflow.findUnique({ where: { id: numId } });
   }
 
   async getAllWorkflows() {
@@ -28,19 +32,33 @@ export class WorkflowDatabaseService {
       },
     });
   }
+
   async getWorkflowsForUser(userId) {
+    const numId = Number(userId);
+    if (isNaN(numId) || numId <= 0) {
+      throw new Error("Invalid user ID");
+    }
     return prisma.workflow.findMany({
-      where: { userId: Number(userId) },
+      where: { userId: numId },
     });
   }
+
   async deleteWorkflow(id) {
-    return prisma.workflow.delete({ where: { id: Number(id) } });
+    const numId = Number(id);
+    if (isNaN(numId) || numId <= 0) {
+      throw new Error("Invalid workflow ID");
+    }
+    return prisma.workflow.delete({ where: { id: numId } });
   }
 
   async updateWorkflow(id, updateData, tx = null) {
+    const numId = Number(id);
+    if (isNaN(numId) || numId <= 0) {
+      throw new Error("Invalid workflow ID");
+    }
     const client = tx || prisma;
     return client.workflow.update({
-      where: { id: Number(id) },
+      where: { id: numId },
       data: updateData,
     });
   }

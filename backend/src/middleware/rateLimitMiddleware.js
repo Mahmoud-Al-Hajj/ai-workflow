@@ -11,6 +11,19 @@ export const apiLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Stricter rate limiter for authentication endpoints
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Only 5 attempts per 15 minutes for auth endpoints
+  skipSuccessfulRequests: true, // Don't count successful logins
+  message: {
+    success: false,
+    error: "Too many login/registration attempts. Please try again later.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 export const workflowLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 30, // limit each IP to 30 workflow creations per hour

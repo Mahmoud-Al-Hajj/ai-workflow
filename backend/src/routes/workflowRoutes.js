@@ -40,12 +40,8 @@ router.post(
   authMiddleware,
   (req, res) => workflowController.createCompleteWorkflow(req, res)
 );
-router.delete(
-  "/workflows/:id",
-  adminMiddleware,
-  validateIdParam,
-  authMiddleware,
-  (req, res) => workflowController.deleteWorkflow(req, res)
+router.delete("/workflows/:id", authMiddleware, validateIdParam, (req, res) =>
+  workflowController.deleteWorkflow(req, res)
 );
 
 export default router;

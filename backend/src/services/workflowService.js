@@ -13,6 +13,17 @@ export class WorkflowService {
   }
 
   async createCompleteWorkflow({ description, userId, n8nUrl, n8nApiKey }) {
+    // Input validation
+    if (!userId || !description || !n8nUrl || !n8nApiKey) {
+      throw new Error(
+        "Missing required fields: userId, description, n8nUrl, n8nApiKey"
+      );
+    }
+
+    if (typeof description !== "string" || description.length < 10) {
+      throw new Error("Description must be at least 10 characters");
+    }
+
     const startTime = Date.now();
     logger.info("Starting workflow creation (background processing)", {
       userId,
@@ -33,8 +44,8 @@ export class WorkflowService {
       workflowId: savedWorkflow.id,
     });
 
-    // Step 2: Start background
-    setImmediate(async () => {
+    // Step 2: Start background processing with proper error handling
+    const backgroundTask = (async () => {
       const bgStartTime = Date.now();
       let aiWorkflowJson = null;
       let n8nWorkflowId = null;
@@ -111,7 +122,7 @@ export class WorkflowService {
           duration: Date.now() - bgStartTime,
         });
 
-        // Mark as FAILED
+        // Mark as FAILED with error message
         try {
           await this.workflowDBService.updateWorkflow(savedWorkflow.id, {
             status: "FAILED",
@@ -124,7 +135,20 @@ export class WorkflowService {
           });
         }
       }
+    })();
+
+    // Attach error handler to catch any unhandled rejections
+    backgroundTask.catch((err) => {
+      logger.error("Unhandled error in background workflow task", {
+        userId,
+        workflowId: savedWorkflow.id,
+        error: err.message,
+        stack: err.stack,
+      });
     });
+
+    // Trigger background task without awaiting
+    setImmediate(() => backgroundTask);
 
     // Step 3: Return immediately with PENDING workflow
     const duration = Date.now() - startTime;

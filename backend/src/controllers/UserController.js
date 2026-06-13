@@ -71,7 +71,22 @@ export class UserController {
   }
 
   async updateUser(req, res) {
-    const id = req.params.id;
+    const id = parseInt(req.params.id);
+    if (isNaN(id) || id <= 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid user ID",
+      });
+    }
+
+    // Authorization check: users can only update their own profile, admins can update any
+    if (req.user.id !== id && req.user.role !== "admin") {
+      return res.status(403).json({
+        success: false,
+        error: "Forbidden: You can only update your own profile",
+      });
+    }
+
     const updatedData = req.body;
     try {
       const user = await this.userService.updateUser(id, updatedData);

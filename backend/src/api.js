@@ -10,6 +10,33 @@ import workflowRoutes from "./routes/workflowRoutes.js";
 
 dotenv.config();
 
+// Validate required environment variables at startup
+function validateEnvironmentVariables() {
+  const required = [
+    "DATABASE_URL",
+    "JWT_SECRET",
+    "ENCRYPTION_SECRET",
+    "NODE_ENV",
+  ];
+
+  const missing = required.filter((key) => !process.env[key]);
+
+  if (missing.length > 0) {
+    logger.error(
+      `❌ Missing required environment variables: ${missing.join(", ")}`
+    );
+    console.error(
+      `❌ FATAL: Missing environment variables: ${missing.join(", ")}`
+    );
+    process.exit(1);
+  }
+
+  logger.info("✅ All required environment variables are configured");
+}
+
+// Validate environment variables before starting the server
+validateEnvironmentVariables();
+
 const app = express();
 
 const PORT = process.env.PORT || 3000;

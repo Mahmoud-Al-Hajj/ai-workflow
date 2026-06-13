@@ -14,7 +14,13 @@ class AuthService {
     const token = generateToken(user.id);
     return { user, token };
   }
+
   async register({ name, email, password, n8nUrl, n8nApiKey }) {
+    // Validate n8n credentials before creating user
+    if (!n8nUrl || !n8nApiKey) {
+      throw new Error("n8n URL and API key are required");
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     let encryptedKey = null;

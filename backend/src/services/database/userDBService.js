@@ -14,16 +14,26 @@ export class UserDBService {
   }
 
   async getAllUsers() {
+    // Only return essential user fields without exposing all workflows
     return prisma.user.findMany({
-      include: {
-        workflows: true, // Include user's workflows
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        // Exclude workflows to prevent unnecessary data exposure
       },
     });
   }
 
   async getUserById(id) {
+    const numId = parseInt(id, 10);
+    if (isNaN(numId) || numId <= 0) {
+      throw new Error("Invalid user ID");
+    }
     return prisma.user.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: numId },
       include: {
         workflows: true,
       },
@@ -31,15 +41,23 @@ export class UserDBService {
   }
 
   async updateUser(id, updateData) {
+    const numId = parseInt(id, 10);
+    if (isNaN(numId) || numId <= 0) {
+      throw new Error("Invalid user ID");
+    }
     return prisma.user.update({
-      where: { id: parseInt(id) },
+      where: { id: numId },
       data: updateData,
     });
   }
 
   async deleteUser(id) {
+    const numId = parseInt(id, 10);
+    if (isNaN(numId) || numId <= 0) {
+      throw new Error("Invalid user ID");
+    }
     return prisma.user.delete({
-      where: { id: parseInt(id) },
+      where: { id: numId },
     });
   }
 
