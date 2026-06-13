@@ -4,8 +4,6 @@ import { deployWorkflow } from "../services/workflow/deploymentService.js";
 
 dotenv.config();
 
-//this uses the .env variables and its for testing purposes
-//and also not to use the apis each time i want to test
 const API_KEY = process.env.N8N_API_KEY;
 const N8N_URL = process.env.N8N_URL;
 

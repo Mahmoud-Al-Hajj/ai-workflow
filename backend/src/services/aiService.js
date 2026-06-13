@@ -21,6 +21,30 @@ function getAvailableNodes() {
   return new Set(nodes);
 }
 
+// Helper function for exponential backoff retry
+async function retryWithBackoff(fn, maxRetries = 3, initialDelay = 1000) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      const isRateLimitError = error.response?.status === 429;
+      const isLastAttempt = attempt === maxRetries - 1;
+
+      if (!isRateLimitError || isLastAttempt) {
+        throw error;
+      }
+
+      const delay = initialDelay * Math.pow(2, attempt);
+      console.log(
+        `Rate limit hit. Retrying in ${delay}ms... (Attempt ${
+          attempt + 1
+        }/${maxRetries})`
+      );
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+
 export async function getUserJsonFromEnglish(description) {
   const apiKey = process.env.GEMINI_API_KEY;
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
@@ -546,9 +570,16 @@ Output: {
     },
   };
 
-  const resp = await axios.post(url, body, {
-    headers: { "Content-Type": "application/json" },
-  });
+  // Wrap the API call in retry logic
+  const resp = await retryWithBackoff(
+    async () => {
+      return await axios.post(url, body, {
+        headers: { "Content-Type": "application/json" },
+      });
+    },
+    3,
+    2000
+  ); // 3 retries, starting with 2 second delay
 
   const text = resp.data?.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!text) {
