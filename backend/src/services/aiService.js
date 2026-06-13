@@ -8,10 +8,8 @@ import { nodeMatchingService } from "./workflow/nodeMatchingService.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load environment variables
 dotenv.config();
 
-// Load official nodes and generate service list
 function getAvailableNodes() {
   const nodesPath = path.join(__dirname, "../../nodes");
   const nodes = fs
