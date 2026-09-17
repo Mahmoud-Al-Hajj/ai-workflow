@@ -4,16 +4,13 @@ import {
   validateRegister,
   validateLogin,
 } from "../middleware/validationMiddleware.js";
-import {
-  authMiddleware,
-  adminMiddleware,
-} from "../middleware/authMiddleware.js";
+import { authMiddleware, requireAdmin } from "../middleware/authMiddleware.js";
 import { authLimiter } from "../middleware/rateLimitMiddleware.js";
 
 const router = express.Router();
 const userController = new UserController();
 
-router.get("/users", adminMiddleware, (req, res) =>
+router.get("/users", requireAdmin, (req, res) =>
   userController.getAllUsers(req, res),
 );
 router.get("/users/:id", authMiddleware, (req, res) =>
@@ -23,7 +20,7 @@ router.put("/users/:id", authMiddleware, (req, res) =>
   userController.updateUser(req, res),
 );
 
-router.delete("/users/:id", adminMiddleware, (req, res) =>
+router.delete("/users/:id", requireAdmin, (req, res) =>
   userController.deleteUser(req, res),
 );
 

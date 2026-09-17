@@ -45,3 +45,8 @@ export async function adminMiddleware(req, res, next) {
   }
   next();
 }
+
+// adminMiddleware reads req.user, which authMiddleware sets, so the two must
+// run in this order. Exported composed rather than separately, because listing
+// them the wrong way round silently 401s every caller including admins.
+export const requireAdmin = [authMiddleware, adminMiddleware];

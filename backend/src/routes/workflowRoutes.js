@@ -4,10 +4,7 @@ import {
   apiLimiter,
   workflowLimiter,
 } from "../middleware/rateLimitMiddleware.js";
-import {
-  authMiddleware,
-  adminMiddleware,
-} from "../middleware/authMiddleware.js";
+import { authMiddleware, requireAdmin } from "../middleware/authMiddleware.js";
 import {
   validateCreateWorkflow,
   validateIdParam,
@@ -16,12 +13,8 @@ import {
 const router = express.Router();
 const workflowController = new WorkflowController();
 
-router.get(
-  "/workflows",
-  workflowLimiter,
-  adminMiddleware,
-  authMiddleware,
-  (req, res) => workflowController.getAllWorkflows(req, res),
+router.get("/workflows", workflowLimiter, requireAdmin, (req, res) =>
+  workflowController.getAllWorkflows(req, res),
 );
 router.get("/workflows/user/:userId", apiLimiter, authMiddleware, (req, res) =>
   workflowController.getWorkflowsForUser(req, res),
