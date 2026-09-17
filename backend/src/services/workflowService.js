@@ -16,7 +16,7 @@ export class WorkflowService {
     // Input validation
     if (!userId || !description || !n8nUrl || !n8nApiKey) {
       throw new Error(
-        "Missing required fields: userId, description, n8nUrl, n8nApiKey"
+        "Missing required fields: userId, description, n8nUrl, n8nApiKey",
       );
     }
 
@@ -70,7 +70,7 @@ export class WorkflowService {
           AIResponseValidator.validateAIWorkflowResponse(aiWorkflowJson);
         if (!validation.isValid) {
           throw new Error(
-            `AI response validation failed: ${validation.errors.join(", ")}`
+            `AI response validation failed: ${validation.errors.join(", ")}`,
           );
         }
 

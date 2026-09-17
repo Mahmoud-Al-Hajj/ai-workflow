@@ -8,7 +8,7 @@ export async function callN8nWithApiKey(
   n8nUrl,
   endpoint,
   method = "GET",
-  data = null
+  data = null,
 ) {
   try {
     // n8n API uses /api/v1/ for public API endpoints
@@ -31,9 +31,9 @@ export async function callN8nWithApiKey(
     const response = await axios(config);
     return response.data;
   } catch (err) {
-    console.error("❌ n8n API call failed:", err.response?.data || err.message);
+    console.error("  n8n API call failed:", err.response?.data || err.message);
     throw new Error(
-      `n8n API Error: ${err.response?.data?.message || err.message}`
+      `n8n API Error: ${err.response?.data?.message || err.message}`,
     );
   }
 }
@@ -42,10 +42,10 @@ export async function validateN8nApiKey(apiKey, n8nUrl) {
   try {
     // Use workflows endpoint to test API key (simpler than user endpoint)
     const result = await callN8nWithApiKey(apiKey, n8nUrl, "/workflows");
-    console.log("✅ n8n API key is valid");
+    console.log("  n8n API key is valid");
     return true;
   } catch (err) {
-    console.error("❌ Invalid n8n API key:", err.message);
+    console.error("  Invalid n8n API key:", err.message);
     return false;
   }
 }
@@ -60,7 +60,7 @@ export async function createN8nWorkflow(apiKey, n8nUrl, workflowData) {
     n8nUrl,
     "/workflows",
     "POST",
-    workflowData
+    workflowData,
   );
 }
 

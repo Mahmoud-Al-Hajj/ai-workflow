@@ -1,9 +1,10 @@
 import dotenv from "dotenv";
-import axios from "axios";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { nodeMatchingService } from "./workflow/nodeMatchingService.js";
+import logger from "../utils/logger.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,13 +20,24 @@ function getAvailableNodes() {
   return new Set(nodes);
 }
 
+// Initialize Google Generative AI client
+function getGeminiClient() {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY environment variable is not set");
+  }
+  return new GoogleGenerativeAI(apiKey);
+}
+
 // Helper function for exponential backoff retry
 async function retryWithBackoff(fn, maxRetries = 3, initialDelay = 1000) {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await fn();
     } catch (error) {
-      const isRateLimitError = error.response?.status === 429;
+      const isRateLimitError =
+        error.message?.includes("429") ||
+        error.message?.includes("RESOURCE_EXHAUSTED");
       const isLastAttempt = attempt === maxRetries - 1;
 
       if (!isRateLimitError || isLastAttempt) {
@@ -33,19 +45,17 @@ async function retryWithBackoff(fn, maxRetries = 3, initialDelay = 1000) {
       }
 
       const delay = initialDelay * Math.pow(2, attempt);
-      console.log(
-        `Rate limit hit. Retrying in ${delay}ms... (Attempt ${
-          attempt + 1
-        }/${maxRetries})`
-      );
+      logger.warn(`Rate limit hit. Retrying in ${delay}ms...`, {
+        attempt: attempt + 1,
+        maxRetries,
+      });
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
 }
 
 export async function getUserJsonFromEnglish(description) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const genAI = getGeminiClient();
 
   // Generate dynamic service mappings based on user input
   const dynamicMappings =
@@ -568,33 +578,48 @@ Output: {
     },
   };
 
-  // Wrap the API call in retry logic
-  const resp = await retryWithBackoff(
-    async () => {
-      return await axios.post(url, body, {
-        headers: { "Content-Type": "application/json" },
-      });
-    },
-    3,
-    2000
-  ); // 3 retries, starting with 2 second delay
-
-  const text = resp.data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) {
-    throw new Error(
-      "Gemini returned no text: " + JSON.stringify(resp.data, null, 2)
-    );
-  }
-
-  // Clean text in case AI adds any extra markdown/code fences
-  const cleaned = text.replace(/```json|```/g, "").trim();
-
   try {
-    const parsedJson = JSON.parse(cleaned); // pure JSON object
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-    // Return the pure AI output without any validation/modification
-    return parsedJson;
-  } catch (err) {
-    throw new Error("Failed to parse JSON from Gemini output: " + cleaned);
+    const result = await retryWithBackoff(
+      async () => {
+        return await model.generateContent({
+          systemInstruction: body.systemInstruction.parts[0].text,
+          contents: body.contents,
+          generationConfig: body.generationConfig,
+        });
+      },
+      3,
+      2000,
+    );
+
+    const response = await result.response;
+    const text = response.text();
+
+    if (!text) {
+      throw new Error("Gemini returned no text");
+    }
+
+    // Clean text in case AI adds any extra markdown/code fences
+    const cleaned = text.replace(/```json|```/g, "").trim();
+
+    try {
+      const parsedJson = JSON.parse(cleaned);
+
+      logger.info("Workflow JSON generated successfully from Gemini", {
+        service: "AIService",
+      });
+
+      // Return the pure AI output without any validation/modification
+      return parsedJson;
+    } catch (err) {
+      throw new Error("Failed to parse JSON from Gemini output: " + cleaned);
+    }
+  } catch (error) {
+    logger.error("Error generating workflow from Gemini", {
+      error: error.message,
+      service: "AIService",
+    });
+    throw error;
   }
 }

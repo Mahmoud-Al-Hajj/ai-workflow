@@ -23,15 +23,15 @@ function validateEnvironmentVariables() {
 
   if (missing.length > 0) {
     logger.error(
-      `❌ Missing required environment variables: ${missing.join(", ")}`
+      `  Missing required environment variables: ${missing.join(", ")}`,
     );
     console.error(
-      `❌ FATAL: Missing environment variables: ${missing.join(", ")}`
+      `  FATAL: Missing environment variables: ${missing.join(", ")}`,
     );
     process.exit(1);
   }
 
-  logger.info("✅ All required environment variables are configured");
+  logger.info("  All required environment variables are configured");
 }
 
 // Validate environment variables before starting the server
@@ -99,7 +99,7 @@ app.use(
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 app.use(compression());
 app.use(express.json({ limit: "15mb" }));

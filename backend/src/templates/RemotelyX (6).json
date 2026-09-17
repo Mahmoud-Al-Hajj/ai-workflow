@@ -16,10 +16,7 @@
       },
       "type": "n8n-nodes-base.gmailTrigger",
       "typeVersion": 1.3,
-      "position": [
-        -224,
-        336
-      ],
+      "position": [-224, 336],
       "id": "609515e3-7622-407f-955c-ba8a348a776e",
       "name": "Gmail Trigger",
       "alwaysOutputData": false,
@@ -38,23 +35,17 @@
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        0,
-        336
-      ],
+      "position": [0, 336],
       "id": "f2673621-86da-4ef6-9efa-ffd9195e23f5",
       "name": "Code"
     },
     {
       "parameters": {
-        "jsCode": "// n8n Function node (NOT Function Item)\n// Expects items[0].json.rawText to contain the whole job post as one big string.\n// Returns a single item with structured fields + bullet arrays.\n\nfunction getText(item) {\n  // Preferred: rawText\n  if (item.json && typeof item.json.rawText === 'string' && item.json.rawText.trim()) return item.json.rawText;\n\n  // Fallbacks (optional): if you ever feed a parsed Gamma export, this will still work.\n  if (Array.isArray(item.json?.content)) return item.json.content.join('\\n');\n  try {\n    const s = item.json?.stdout || item.json?.body || '';\n    if (typeof s === 'string' && s.trim()) {\n      const parsed = JSON.parse(s);\n      if (Array.isArray(parsed?.content)) return parsed.content.join('\\n');\n      if (typeof parsed?.content === 'string') return parsed.content;\n    }\n  } catch (e) {}\n\n  // Last resort\n  return typeof item.json === 'string' ? item.json : JSON.stringify(item.json ?? {});\n}\n\nconst item = items[0] || { json: {} };\nlet text = getText(item);\n\n// Normalize whitespace\ntext = String(text || '').replace(/\\r\\n/g, '\\n');\n\n// Section headers we care about\nconst HEADERS = ['Company Overview','Key Responsibilities','Qualifications','Position Description'];\n\n// Sentinels to help find the end of a section in messy/repeated documents\nconst SENTINELS = [\n  'Made with',\n  'Technical Backend Specialist',\n  'Company Overview',\n  'Key Responsibilities',\n  'Qualifications',\n  'Position Description'\n];\n\n// Escape for regex\nconst esc = (s) => s.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n\n// Find all candidate slices for a header, then pick the best by a content score\nfunction candidatesFor(header) {\n  const re = new RegExp(esc(header), 'gi');\n  let m;\n  const starts = [];\n  while ((m = re.exec(text)) !== null) starts.push(m.index);\n\n  const cands = [];\n  for (const s of starts) {\n    let end = text.length;\n    for (const h of [...HEADERS, ...SENTINELS]) {\n      const re2 = new RegExp(esc(h), 'gi');\n      const chunk = text.slice(s + header.length);\n      const m2 = re2.exec(chunk);\n      if (m2) {\n        const idx = s + header.length + m2.index;\n        if (idx > s && idx < end) end = idx;\n      }\n    }\n    const slice = text.slice(s + header.length, end).trim();\n    if (slice) cands.push(slice);\n  }\n  return cands;\n}\n\nfunction scoreSection(s) {\n  // Reward actual content: alphanumerics + number of non-trivial lines\n  const alnum = (s.match(/[A-Za-z0-9]/g) || []).length;\n  const longLines = s.split('\\n').filter(l => l.trim().length > 10).length;\n  return alnum + longLines * 50;\n}\n\nfunction pickBest(header) {\n  const cands = candidatesFor(header);\n  if (!cands.length) return '';\n  cands.sort((a, b) => scoreSection(b) - scoreSection(a));\n  return cands[0];\n}\n\n// Remove duplicate lines, headings, and noise\nfunction dedupeLines(s) {\n  const skip = new Set(['expand','company overview','key responsibilities','qualifications','position description','made with']);\n  const seen = new Set();\n  const out = [];\n  for (const raw of String(s || '').split('\\n')) {\n    const l = raw.trim();\n    if (!l) continue;\n    if (skip.has(l.toLowerCase())) continue;\n    const key = l.toLowerCase();\n    if (seen.has(key)) continue;\n    seen.add(key);\n    out.push(l);\n  }\n  return out.join('\\n').trim();\n}\n\n// Turn a text block into bullet points\nfunction bulletsFrom(s) {\n  const lines = String(s || '').split('\\n').map(l => l.trim()).filter(Boolean);\n  const bullets = [];\n  for (let l of lines) {\n    l = l.replace(/\\s{2,}/g, ' ');\n    // Split where a new bullet likely starts (dash, dot, or emoji bullets)\n    const parts = l.split(/(?=(?:^|[\\s])(?:[-•●▪︎▪•]|[✅🧩🔧⚙️🧠📡💡]))/g)\n                   .map(p => p.trim())\n                   .filter(Boolean);\n    for (let p of parts) {\n      p = p.replace(/^[\\-\\u2022\\u2023\\u25CF\\u25E6\\u2043✅🧩🔧⚙️🧠📡💡\\s]+/, '').trim();\n      if (p) bullets.push(p);\n    }\n  }\n  // Unique bullets, preserve order\n  const seen = new Set();\n  const uniq = [];\n  for (const b of bullets) {\n    const k = b.toLowerCase();\n    if (seen.has(k)) continue;\n    seen.add(k);\n    uniq.push(b);\n  }\n  return uniq;\n}\n\n// Extract sections\nconst titleMatch = text.match(/Technical Backend Specialist[^\\n]*/i);\nconst title = titleMatch ? titleMatch[0].trim() : 'Technical Backend Specialist';\n\nlet company_overview = dedupeLines(pickBest('Company Overview'));\nlet key_responsibilities = dedupeLines(pickBest('Key Responsibilities'));\nlet qualifications = dedupeLines(pickBest('Qualifications'));\nlet position_description = dedupeLines(pickBest('Position Description'));\n\n// Derive bullets\nconst responsibilities_list = bulletsFrom(key_responsibilities);\nconst qualifications_list = bulletsFrom(qualifications);\nconst position_notes = bulletsFrom(position_description);\n\n// Optional: quick facts\nconst compensation = (text.match(/Compensation:\\s*\\$?[\\d,]+(?:\\s*-\\s*\\$?[\\d,]+)?/i) || [''])[0]\n  .replace(/Compensation:\\s*/i, '') || null;\nconst work_hours = (text.match(/work (?:between|from)\\s*[^.\\n]+/i) || [''])[0] || null;\nconst location = (text.match(/\\bLeb(?:anon)?\\b|\\bBeirut\\b/i) || [''])[0] || null;\nlet job_url = null;\n\ntry {\n  const parsed = JSON.parse(item.json.stdout || '{}');\n  job_url = parsed.url || null;\n} catch (e) {\n  job_url = null;\n}\n\n\nreturn [\n  {\n    json: {\n      title,\n      job_url,\n      company_overview,\n      key_responsibilities,\n      qualifications,\n      position_description,\n      responsibilities_list,\n      qualifications_list,\n      position_notes,\n      compensation,\n      work_hours,\n      location\n    }\n  }\n];\n"
+        "jsCode": "// n8n Function node (NOT Function Item)\n// Expects items[0].json.rawText to contain the whole job post as one big string.\n// Returns a single item with structured fields + bullet arrays.\n\nfunction getText(item) {\n  // Preferred: rawText\n  if (item.json && typeof item.json.rawText === 'string' && item.json.rawText.trim()) return item.json.rawText;\n\n  // Fallbacks (optional): if you ever feed a parsed Gamma export, this will still work.\n  if (Array.isArray(item.json?.content)) return item.json.content.join('\\n');\n  try {\n    const s = item.json?.stdout || item.json?.body || '';\n    if (typeof s === 'string' && s.trim()) {\n      const parsed = JSON.parse(s);\n      if (Array.isArray(parsed?.content)) return parsed.content.join('\\n');\n      if (typeof parsed?.content === 'string') return parsed.content;\n    }\n  } catch (e) {}\n\n  // Last resort\n  return typeof item.json === 'string' ? item.json : JSON.stringify(item.json ?? {});\n}\n\nconst item = items[0] || { json: {} };\nlet text = getText(item);\n\n// Normalize whitespace\ntext = String(text || '').replace(/\\r\\n/g, '\\n');\n\n// Section headers we care about\nconst HEADERS = ['Company Overview','Key Responsibilities','Qualifications','Position Description'];\n\n// Sentinels to help find the end of a section in messy/repeated documents\nconst SENTINELS = [\n  'Made with',\n  'Technical Backend Specialist',\n  'Company Overview',\n  'Key Responsibilities',\n  'Qualifications',\n  'Position Description'\n];\n\n// Escape for regex\nconst esc = (s) => s.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n\n// Find all candidate slices for a header, then pick the best by a content score\nfunction candidatesFor(header) {\n  const re = new RegExp(esc(header), 'gi');\n  let m;\n  const starts = [];\n  while ((m = re.exec(text)) !== null) starts.push(m.index);\n\n  const cands = [];\n  for (const s of starts) {\n    let end = text.length;\n    for (const h of [...HEADERS, ...SENTINELS]) {\n      const re2 = new RegExp(esc(h), 'gi');\n      const chunk = text.slice(s + header.length);\n      const m2 = re2.exec(chunk);\n      if (m2) {\n        const idx = s + header.length + m2.index;\n        if (idx > s && idx < end) end = idx;\n      }\n    }\n    const slice = text.slice(s + header.length, end).trim();\n    if (slice) cands.push(slice);\n  }\n  return cands;\n}\n\nfunction scoreSection(s) {\n  // Reward actual content: alphanumerics + number of non-trivial lines\n  const alnum = (s.match(/[A-Za-z0-9]/g) || []).length;\n  const longLines = s.split('\\n').filter(l => l.trim().length > 10).length;\n  return alnum + longLines * 50;\n}\n\nfunction pickBest(header) {\n  const cands = candidatesFor(header);\n  if (!cands.length) return '';\n  cands.sort((a, b) => scoreSection(b) - scoreSection(a));\n  return cands[0];\n}\n\n// Remove duplicate lines, headings, and noise\nfunction dedupeLines(s) {\n  const skip = new Set(['expand','company overview','key responsibilities','qualifications','position description','made with']);\n  const seen = new Set();\n  const out = [];\n  for (const raw of String(s || '').split('\\n')) {\n    const l = raw.trim();\n    if (!l) continue;\n    if (skip.has(l.toLowerCase())) continue;\n    const key = l.toLowerCase();\n    if (seen.has(key)) continue;\n    seen.add(key);\n    out.push(l);\n  }\n  return out.join('\\n').trim();\n}\n\n// Turn a text block into bullet points\nfunction bulletsFrom(s) {\n  const lines = String(s || '').split('\\n').map(l => l.trim()).filter(Boolean);\n  const bullets = [];\n  for (let l of lines) {\n    l = l.replace(/\\s{2,}/g, ' ');\n    // Split where a new bullet likely starts (dash, dot, or emoji bullets)\n    const parts = l.split(/(?=(?:^|[\\s])(?:[-•●▪︎▪•]|[ 🧩🔧⚙️🧠📡💡]))/g)\n                   .map(p => p.trim())\n                   .filter(Boolean);\n    for (let p of parts) {\n      p = p.replace(/^[\\-\\u2022\\u2023\\u25CF\\u25E6\\u2043 🧩🔧⚙️🧠📡💡\\s]+/, '').trim();\n      if (p) bullets.push(p);\n    }\n  }\n  // Unique bullets, preserve order\n  const seen = new Set();\n  const uniq = [];\n  for (const b of bullets) {\n    const k = b.toLowerCase();\n    if (seen.has(k)) continue;\n    seen.add(k);\n    uniq.push(b);\n  }\n  return uniq;\n}\n\n// Extract sections\nconst titleMatch = text.match(/Technical Backend Specialist[^\\n]*/i);\nconst title = titleMatch ? titleMatch[0].trim() : 'Technical Backend Specialist';\n\nlet company_overview = dedupeLines(pickBest('Company Overview'));\nlet key_responsibilities = dedupeLines(pickBest('Key Responsibilities'));\nlet qualifications = dedupeLines(pickBest('Qualifications'));\nlet position_description = dedupeLines(pickBest('Position Description'));\n\n// Derive bullets\nconst responsibilities_list = bulletsFrom(key_responsibilities);\nconst qualifications_list = bulletsFrom(qualifications);\nconst position_notes = bulletsFrom(position_description);\n\n// Optional: quick facts\nconst compensation = (text.match(/Compensation:\\s*\\$?[\\d,]+(?:\\s*-\\s*\\$?[\\d,]+)?/i) || [''])[0]\n  .replace(/Compensation:\\s*/i, '') || null;\nconst work_hours = (text.match(/work (?:between|from)\\s*[^.\\n]+/i) || [''])[0] || null;\nconst location = (text.match(/\\bLeb(?:anon)?\\b|\\bBeirut\\b/i) || [''])[0] || null;\nlet job_url = null;\n\ntry {\n  const parsed = JSON.parse(item.json.stdout || '{}');\n  job_url = parsed.url || null;\n} catch (e) {\n  job_url = null;\n}\n\n\nreturn [\n  {\n    json: {\n      title,\n      job_url,\n      company_overview,\n      key_responsibilities,\n      qualifications,\n      position_description,\n      responsibilities_list,\n      qualifications_list,\n      position_notes,\n      compensation,\n      work_hours,\n      location\n    }\n  }\n];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        896,
-        336
-      ],
+      "position": [896, 336],
       "id": "3d30ad90-8b80-43ad-94d2-2c24f8748d4d",
       "name": "Code1"
     },
@@ -64,10 +55,7 @@
       },
       "type": "n8n-nodes-base.executeCommand",
       "typeVersion": 1,
-      "position": [
-        672,
-        336
-      ],
+      "position": [672, 336],
       "id": "be77dd93-3858-4061-a793-8d0bef01c67a",
       "name": "Execute Command1"
     },
@@ -79,10 +67,7 @@
       },
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
-      "position": [
-        1120,
-        336
-      ],
+      "position": [1120, 336],
       "id": "250aab9a-b9a9-4f25-b584-0fbcfde4527f",
       "name": "Basic LLM Chain"
     },
@@ -92,10 +77,7 @@
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
-      "position": [
-        1200,
-        560
-      ],
+      "position": [1200, 560],
       "id": "4a661a79-f908-44b0-88a2-f824c7919d99",
       "name": "Google Gemini Chat Model",
       "credentials": {
@@ -111,10 +93,7 @@
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        1472,
-        336
-      ],
+      "position": [1472, 336],
       "id": "f2591c03-bb50-468c-a79d-e2761f66db6e",
       "name": "Code3"
     },
@@ -210,10 +189,7 @@
       },
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
-      "position": [
-        1696,
-        240
-      ],
+      "position": [1696, 240],
       "id": "2cc10001-e0de-48aa-9a84-9e8ee2e4b4ca",
       "name": "Append row in sheet",
       "credentials": {
@@ -251,10 +227,7 @@
       },
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
-      "position": [
-        224,
-        336
-      ],
+      "position": [224, 336],
       "id": "d67f106a-61ef-49bd-9df7-24e21e9b4b8b",
       "name": "Get row(s) in sheet1",
       "alwaysOutputData": true,
@@ -292,10 +265,7 @@
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [
-        448,
-        336
-      ],
+      "position": [448, 336],
       "id": "6586102a-8485-4150-8083-2129bdca58bf",
       "name": "If",
       "alwaysOutputData": true
@@ -306,10 +276,7 @@
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        1696,
-        432
-      ],
+      "position": [1696, 432],
       "id": "10d43693-3fbd-4874-81bf-590fe23df23f",
       "name": "Clean"
     },
@@ -322,10 +289,7 @@
       },
       "type": "n8n-nodes-base.mongoDb",
       "typeVersion": 1.2,
-      "position": [
-        1920,
-        432
-      ],
+      "position": [1920, 432],
       "id": "b4504867-db68-449b-b073-30f70e238b37",
       "name": "Insert documents",
       "credentials": {
