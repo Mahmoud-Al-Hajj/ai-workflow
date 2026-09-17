@@ -21,27 +21,27 @@ router.get(
   workflowLimiter,
   adminMiddleware,
   authMiddleware,
-  (req, res) => workflowController.getAllWorkflows(req, res)
+  (req, res) => workflowController.getAllWorkflows(req, res),
 );
 router.get("/workflows/user/:userId", apiLimiter, authMiddleware, (req, res) =>
-  workflowController.getWorkflowsForUser(req, res)
+  workflowController.getWorkflowsForUser(req, res),
 );
 router.get(
   "/workflows/:id",
   apiLimiter,
   validateIdParam,
   authMiddleware,
-  (req, res) => workflowController.getWorkflowById(req, res)
+  (req, res) => workflowController.getWorkflowById(req, res),
 );
 router.post(
   "/workflows",
   workflowLimiter,
   validateCreateWorkflow,
   authMiddleware,
-  (req, res) => workflowController.createCompleteWorkflow(req, res)
+  (req, res) => workflowController.createCompleteWorkflow(req, res),
 );
 router.delete("/workflows/:id", authMiddleware, validateIdParam, (req, res) =>
-  workflowController.deleteWorkflow(req, res)
+  workflowController.deleteWorkflow(req, res),
 );
 
 export default router;

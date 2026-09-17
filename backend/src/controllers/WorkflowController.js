@@ -20,7 +20,8 @@ export class WorkflowController {
     if (!n8nUrl || !n8nApiKey) {
       return res.status(400).json({
         success: false,
-        error: "n8n credentials not configured. Please update your profile with valid n8n credentials.",
+        error:
+          "n8n credentials not configured. Please update your profile with valid n8n credentials.",
       });
     }
 
@@ -30,7 +31,8 @@ export class WorkflowController {
     } catch (error) {
       return res.status(500).json({
         success: false,
-        error: "Failed to decrypt n8n credentials. Please reconfigure your profile.",
+        error:
+          "Failed to decrypt n8n credentials. Please reconfigure your profile.",
       });
     }
 
