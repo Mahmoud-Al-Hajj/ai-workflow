@@ -87,7 +87,7 @@ export class WorkflowService {
           workflowId: savedWorkflow.id,
         });
         const deployStart = Date.now();
-        n8nWorkflowId = await deployWorkflow(aiWorkflowJson, n8nApiKey, n8nUrl);
+        n8nWorkflowId = await deployWorkflow(definition, n8nApiKey, n8nUrl);
         const deployDuration = Date.now() - deployStart;
 
         logger.info("Workflow deployed to n8n", {

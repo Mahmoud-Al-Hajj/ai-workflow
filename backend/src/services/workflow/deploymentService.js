@@ -1,15 +1,17 @@
 import dotenv from "dotenv";
 import { createN8nWorkflow } from "../n8nAuthService.js";
-import { buildDefinition } from "./buildDefinition.js";
 
 dotenv.config();
 
-export async function deployWorkflow(userJson, apiKey, n8nUrl) {
+/**
+ * Write a Definition to a user's n8n Instance. Takes the Definition the caller
+ * already built and stored, so n8n holds the same graph the database does.
+ */
+export async function deployWorkflow(definition, apiKey, n8nUrl) {
   try {
-    const workflow = buildDefinition(userJson);
-    // Add required settings property
-    workflow.settings = workflow.settings || {};
-    const result = await createN8nWorkflow(apiKey, n8nUrl, workflow);
+    // n8n rejects a workflow with no settings object.
+    definition.settings = definition.settings || {};
+    const result = await createN8nWorkflow(apiKey, n8nUrl, definition);
 
     console.log("Workflow deployed successfully!");
     console.log("Response data:", JSON.stringify(result, null, 2));
