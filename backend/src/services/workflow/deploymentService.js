@@ -1,14 +1,12 @@
 import dotenv from "dotenv";
 import { createN8nWorkflow } from "../n8nAuthService.js";
-import { WorkflowBuilderService } from "./workflowBuilderService.js";
+import { buildDefinition } from "./buildDefinition.js";
 
 dotenv.config();
 
 export async function deployWorkflow(userJson, apiKey, n8nUrl) {
   try {
-    // Build workflow dynamically using WorkflowBuilderService
-    const workflowBuilderService = new WorkflowBuilderService();
-    const workflow = workflowBuilderService.buildWorkflow(userJson);
+    const workflow = buildDefinition(userJson);
     // Add required settings property
     workflow.settings = workflow.settings || {};
     const result = await createN8nWorkflow(apiKey, n8nUrl, workflow);

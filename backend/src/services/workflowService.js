@@ -1,7 +1,7 @@
 import { getUserJsonFromEnglish } from "./aiService.js";
 import { WorkflowDatabaseService } from "./database/workflowDBService.js";
 import { deployWorkflow } from "./workflow/deploymentService.js";
-import { WorkflowBuilderService } from "./workflow/workflowBuilderService.js";
+import { buildDefinition } from "./workflow/buildDefinition.js";
 import { AIResponseValidator } from "../utils/AIResponseValidator.js";
 import logger from "../utils/logger.js";
 import prisma from "../lib/prisma.js";
@@ -9,7 +9,6 @@ import prisma from "../lib/prisma.js";
 export class WorkflowService {
   constructor() {
     this.workflowDBService = new WorkflowDatabaseService();
-    this.workflowBuilderService = new WorkflowBuilderService();
   }
 
   async createCompleteWorkflow({ description, userId, n8nUrl, n8nApiKey }) {
@@ -74,13 +73,12 @@ export class WorkflowService {
           );
         }
 
-        // Build n8n workflow
-        const n8nWorkflow =
-          this.workflowBuilderService.buildWorkflow(aiWorkflowJson);
+        // Build the n8n Definition
+        const definition = buildDefinition(aiWorkflowJson);
 
         // Update with generated workflow data
         await this.workflowDBService.updateWorkflow(savedWorkflow.id, {
-          data: n8nWorkflow,
+          data: definition,
         });
 
         // Deploy to n8n
@@ -179,13 +177,6 @@ export class WorkflowService {
 
   async deleteWorkflow(id) {
     return await this.workflowDBService.deleteWorkflow(id);
-  }
-
-  validateWorkflow(workflow) {
-    return this.workflowBuilderService.validateWorkflow(workflow);
-  }
-  getWorkflowStats(workflow) {
-    return this.workflowBuilderService.getWorkflowStats(workflow);
   }
 }
 
