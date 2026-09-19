@@ -7,7 +7,6 @@
     "start": "npx prisma migrate deploy && node src/api.js",
     "start:dev": "node src/api.js",
     "dev": "node src/api.js",
-    "demo": "node src/controllers/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "docker:build": "docker build -t ai-workflow-backend .",
     "docker:run": "docker-compose up -d",

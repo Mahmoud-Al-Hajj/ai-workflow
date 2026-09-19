@@ -22,6 +22,10 @@ export class AIResponseValidator {
     return { isValid: errors.length === 0, errors };
   }
 
+  // Not called yet. validateAIWorkflowResponse checks the Plan's shape but
+  // never its Actions, so an Action with a missing or misspelled mode reaches
+  // buildDefinition and silently attaches to the main chain. Wiring this up is
+  // a behaviour change, so it lands with the planner work rather than here.
   static validateAction(action, index, errors) {
     if (!action || typeof action !== "object") {
       errors.push(`Action ${index}: Must be an object`);

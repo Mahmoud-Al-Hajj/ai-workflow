@@ -3,7 +3,7 @@ import axios from "axios";
 
 dotenv.config();
 
-export async function callN8nWithApiKey(
+async function callN8nWithApiKey(
   apiKey,
   n8nUrl,
   endpoint,
@@ -38,22 +38,6 @@ export async function callN8nWithApiKey(
   }
 }
 
-export async function validateN8nApiKey(apiKey, n8nUrl) {
-  try {
-    // Use workflows endpoint to test API key (simpler than user endpoint)
-    const result = await callN8nWithApiKey(apiKey, n8nUrl, "/workflows");
-    console.log("  n8n API key is valid");
-    return true;
-  } catch (err) {
-    console.error("  Invalid n8n API key:", err.message);
-    return false;
-  }
-}
-
-export async function getN8nWorkflows(apiKey, n8nUrl) {
-  return await callN8nWithApiKey(apiKey, n8nUrl, "/workflows");
-}
-
 export async function createN8nWorkflow(apiKey, n8nUrl, workflowData) {
   return await callN8nWithApiKey(
     apiKey,
@@ -64,19 +48,3 @@ export async function createN8nWorkflow(apiKey, n8nUrl, workflowData) {
   );
 }
 
-//   Activate/deactivate a workflow
-
-// export async function toggleN8nWorkflow(
-//   apiKey,
-//   n8nUrl,
-//   workflowId,
-//   active = true
-// ) {
-//   return await callN8nWithApiKey(
-//     apiKey,
-//     n8nUrl,
-//     `/workflows/${workflowId}/activate`,
-//     "POST",
-//     { active }
-//   );
-// }

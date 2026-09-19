@@ -1,24 +1,9 @@
 import dotenv from "dotenv";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { nodeMatchingService } from "./workflow/nodeMatchingService.js";
 import logger from "../utils/logger.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 dotenv.config();
-
-function getAvailableNodes() {
-  const nodesPath = path.join(__dirname, "../../nodes");
-  const nodes = fs
-    .readdirSync(nodesPath, { withFileTypes: true })
-    .filter((dirent) => dirent.isDirectory())
-    .map((dirent) => dirent.name.toLowerCase());
-  return new Set(nodes);
-}
 
 // Initialize Google Generative AI client
 function getGeminiClient() {

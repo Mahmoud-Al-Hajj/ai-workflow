@@ -101,16 +101,4 @@ function getActionType(serviceName) {
   return nodeInfo?.action || null;
 }
 
-function getAllServices() {
-  const catalog = getEnhancedNodeCatalog();
-  return Object.keys(catalog);
-}
-
-export {
-  getAllNodeTemplates,
-  getEnhancedNodeCatalog,
-  getNodeInfo,
-  getTriggerType,
-  getActionType,
-  getAllServices,
-};
+export { getAllNodeTemplates, getTriggerType, getActionType };

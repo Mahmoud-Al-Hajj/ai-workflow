@@ -4,7 +4,6 @@ import { deployWorkflow } from "./workflow/deploymentService.js";
 import { buildDefinition } from "./workflow/buildDefinition.js";
 import { AIResponseValidator } from "../utils/AIResponseValidator.js";
 import logger from "../utils/logger.js";
-import prisma from "../lib/prisma.js";
 
 export class WorkflowService {
   constructor() {

@@ -163,4 +163,3 @@ export class WorkflowController {
     }
   }
 }
-export const workflowController = new WorkflowController();
