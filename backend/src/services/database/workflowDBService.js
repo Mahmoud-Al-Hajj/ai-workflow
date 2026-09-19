@@ -1,5 +1,16 @@
 import prisma from "../../lib/prisma.js";
 
+// Workflow rows are returned to callers as API responses, so the embedded user
+// carries only fields that are safe to publish — never the password hash or
+// the encrypted n8n API key.
+const PUBLIC_USER_FIELDS = {
+  id: true,
+  name: true,
+  email: true,
+  role: true,
+  createdAt: true,
+};
+
 export class WorkflowDatabaseService {
   // Simple database-only method
   async createWorkflow({ name, data, userId }, tx = null) {
@@ -12,7 +23,7 @@ export class WorkflowDatabaseService {
         status: "PENDING",
       },
       include: {
-        user: true,
+        user: { select: PUBLIC_USER_FIELDS },
       },
     });
   }
@@ -28,7 +39,7 @@ export class WorkflowDatabaseService {
   async getAllWorkflows() {
     return prisma.workflow.findMany({
       include: {
-        user: true,
+        user: { select: PUBLIC_USER_FIELDS },
       },
     });
   }
