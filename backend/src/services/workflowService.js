@@ -1,8 +1,5 @@
-import { getUserJsonFromEnglish } from "./aiService.js";
 import { WorkflowDatabaseService } from "./database/workflowDBService.js";
-import { deployWorkflow } from "./workflow/deploymentService.js";
-import { buildDefinition } from "./workflow/buildDefinition.js";
-import { AIResponseValidator } from "../utils/AIResponseValidator.js";
+import { startGenerationRun } from "./workflow/generationRun.js";
 import logger from "../utils/logger.js";
 
 export class WorkflowService {
@@ -10,8 +7,13 @@ export class WorkflowService {
     this.workflowDBService = new WorkflowDatabaseService();
   }
 
+  /**
+   * Accept a Description and return immediately with a PENDING Workflow. The
+   * Generation Run does the rest in the background (see ADR-0003).
+   */
   async createCompleteWorkflow({ description, userId, n8nUrl, n8nApiKey }) {
-    // Input validation
+    // Re-checked here as a domain invariant, not for HTTP shape: the middleware
+    // only guards one route, this guards every caller.
     if (!userId || !description || !n8nUrl || !n8nApiKey) {
       throw new Error(
         "Missing required fields: userId, description, n8nUrl, n8nApiKey",
@@ -29,7 +31,6 @@ export class WorkflowService {
       service: "WorkflowService",
     });
 
-    // Step 1: Create PENDING workflow record
     const savedWorkflow = await this.workflowDBService.createWorkflow({
       name: description.substring(0, 50) + "...",
       data: null,
@@ -42,117 +43,21 @@ export class WorkflowService {
       workflowId: savedWorkflow.id,
     });
 
-    // Step 2: Start background processing with proper error handling
-    const backgroundTask = (async () => {
-      const bgStartTime = Date.now();
-      let aiWorkflowJson = null;
-      let n8nWorkflowId = null;
-
-      try {
-        logger.info("Background: Generating AI workflow JSON", {
-          userId,
-          workflowId: savedWorkflow.id,
-        });
-        const aiStart = Date.now();
-        aiWorkflowJson = await getUserJsonFromEnglish(description);
-        const aiDuration = Date.now() - aiStart;
-
-        logger.info("AI workflow JSON generated", {
-          userId,
-          workflowId: savedWorkflow.id,
-          aiDuration,
-        });
-
-        // Validation
-        const validation =
-          AIResponseValidator.validateAIWorkflowResponse(aiWorkflowJson);
-        if (!validation.isValid) {
-          throw new Error(
-            `AI response validation failed: ${validation.errors.join(", ")}`,
-          );
-        }
-
-        // Build the n8n Definition
-        const definition = buildDefinition(aiWorkflowJson);
-
-        // Update with generated workflow data
-        await this.workflowDBService.updateWorkflow(savedWorkflow.id, {
-          data: definition,
-        });
-
-        // Deploy to n8n
-        logger.info("Background: Deploying to n8n", {
-          userId,
-          workflowId: savedWorkflow.id,
-        });
-        const deployStart = Date.now();
-        n8nWorkflowId = await deployWorkflow(definition, n8nApiKey, n8nUrl);
-        const deployDuration = Date.now() - deployStart;
-
-        logger.info("Workflow deployed to n8n", {
-          userId,
-          workflowId: savedWorkflow.id,
-          n8nWorkflowId,
-          deployDuration,
-        });
-
-        // Mark as ACTIVE
-        await this.workflowDBService.updateWorkflow(savedWorkflow.id, {
-          n8nWorkflowId,
-          status: "ACTIVE",
-        });
-
-        const totalDuration = Date.now() - bgStartTime;
-        logger.info("Background workflow processing completed", {
-          userId,
-          workflowId: savedWorkflow.id,
-          n8nWorkflowId,
-          totalDuration,
-          aiDuration,
-          deployDuration,
-        });
-      } catch (error) {
-        logger.error("Background workflow processing failed", {
-          userId,
-          workflowId: savedWorkflow.id,
-          error: error.message,
-          duration: Date.now() - bgStartTime,
-        });
-
-        // Mark as FAILED with error message
-        try {
-          await this.workflowDBService.updateWorkflow(savedWorkflow.id, {
-            status: "FAILED",
-            error: error.message,
-          });
-        } catch (updateError) {
-          logger.error("Failed to update workflow status to FAILED", {
-            workflowId: savedWorkflow.id,
-            error: updateError.message,
-          });
-        }
-      }
-    })();
-
-    // Attach error handler to catch any unhandled rejections
-    backgroundTask.catch((err) => {
-      logger.error("Unhandled error in background workflow task", {
-        userId,
-        workflowId: savedWorkflow.id,
-        error: err.message,
-        stack: err.stack,
-      });
+    // Deliberately not awaited: the Generation Run owns every Status
+    // transition from here, and reports failure as FAILED rather than by
+    // throwing at a caller that has already had its response.
+    startGenerationRun({
+      workflowId: savedWorkflow.id,
+      description,
+      userId,
+      n8nUrl,
+      n8nApiKey,
     });
 
-    // Trigger background task without awaiting
-    setImmediate(() => backgroundTask);
-
-    // Step 3: Return immediately with PENDING workflow
-    const duration = Date.now() - startTime;
     logger.info("Workflow creation initiated (background processing started)", {
       userId,
       workflowId: savedWorkflow.id,
-      duration,
+      duration: Date.now() - startTime,
     });
 
     return {
