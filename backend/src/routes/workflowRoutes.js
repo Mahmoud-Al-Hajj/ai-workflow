@@ -19,18 +19,20 @@ router.get("/workflows", workflowLimiter, requireAdmin, (req, res) =>
 router.get("/workflows/user/:userId", apiLimiter, authMiddleware, (req, res) =>
   workflowController.getWorkflowsForUser(req, res),
 );
+// Order throughout: rate limit -> authenticate -> validate. Validating first
+// would report malformed input to callers who are not signed in.
 router.get(
   "/workflows/:id",
   apiLimiter,
-  validateIdParam,
   authMiddleware,
+  validateIdParam,
   (req, res) => workflowController.getWorkflowById(req, res),
 );
 router.post(
   "/workflows",
   workflowLimiter,
-  validateCreateWorkflow,
   authMiddleware,
+  validateCreateWorkflow,
   (req, res) => workflowController.createCompleteWorkflow(req, res),
 );
 router.delete("/workflows/:id", authMiddleware, validateIdParam, (req, res) =>

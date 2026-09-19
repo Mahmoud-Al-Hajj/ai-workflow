@@ -3,6 +3,7 @@ import {
   resolveN8nCredentials,
   N8nCredentialsError,
 } from "../services/auth/n8nCredentials.js";
+import { canAccessWorkflow } from "../services/auth/accessPolicy.js";
 
 export class WorkflowController {
   constructor() {
@@ -82,8 +83,7 @@ export class WorkflowController {
         });
       }
 
-      // Authorization check: users can only view their own workflows, admins can view any
-      if (workflow.userId !== req.user.id && req.user.role !== "admin") {
+      if (!canAccessWorkflow(req.user, workflow)) {
         return res.status(403).json({
           success: false,
           error: "Forbidden: You can only view your own workflows",
@@ -136,15 +136,14 @@ export class WorkflowController {
         });
       }
 
-      // Authorization check: users can delete their own workflows, admins can delete any
-      if (workflow.userId !== req.user.id && req.user.role !== "admin") {
+      if (!canAccessWorkflow(req.user, workflow)) {
         return res.status(403).json({
           success: false,
           error: "Forbidden: You can only delete your own workflows",
         });
       }
 
-      const deleted = await this.workflowService.deleteWorkflow(id);
+      await this.workflowService.deleteWorkflow(id);
       res.json({
         success: true,
         message: "Workflow deleted successfully",

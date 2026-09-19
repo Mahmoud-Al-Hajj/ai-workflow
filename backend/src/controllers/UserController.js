@@ -1,5 +1,6 @@
 import { UserService } from "../services/UserService.js";
 import { AuthService } from "../services/auth/authService.js";
+import { canModifyUser } from "../services/auth/accessPolicy.js";
 
 export class UserController {
   constructor() {
@@ -79,8 +80,7 @@ export class UserController {
       });
     }
 
-    // Authorization check: users can only update their own profile, admins can update any
-    if (req.user.id !== id && req.user.role !== "admin") {
+    if (!canModifyUser(req.user, id)) {
       return res.status(403).json({
         success: false,
         error: "Forbidden: You can only update your own profile",
