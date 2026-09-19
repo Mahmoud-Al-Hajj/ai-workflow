@@ -1,5 +1,4 @@
 import express from "express";
-import rateLimit from "express-rate-limit";
 import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
@@ -7,6 +6,7 @@ import logger from "./utils/logger.js";
 import compression from "compression";
 import userRoutes from "./routes/userRoutes.js";
 import workflowRoutes from "./routes/workflowRoutes.js";
+import { globalLimiter } from "./middleware/rateLimitMiddleware.js";
 
 dotenv.config();
 
@@ -40,29 +40,6 @@ validateEnvironmentVariables();
 const app = express();
 
 const PORT = process.env.PORT || 3000;
-
-const limiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
-  max: 50, // Limit each IP to 50 requests
-  message: {
-    status: 429,
-    error: "Too many requests",
-    message: "You have exceeded the rate limit. Try again later.",
-  },
-  handler: (req, res) => {
-    logger.warn("Rate limit exceeded", {
-      ip: req.ip,
-      userAgent: req.get("User-Agent"),
-      path: req.path,
-      service: "RateLimit",
-    });
-    res.status(429).json({
-      status: 429,
-      error: "Too many requests",
-      message: "You have exceeded the rate limit. Try again later.",
-    });
-  },
-});
 
 // Request logging middleware
 const requestLogger = (req, res, next) => {
@@ -103,7 +80,7 @@ app.use(
 );
 app.use(compression());
 app.use(express.json({ limit: "15mb" }));
-app.use(limiter);
+app.use(globalLimiter);
 
 // Routes
 app.use("/api", userRoutes);

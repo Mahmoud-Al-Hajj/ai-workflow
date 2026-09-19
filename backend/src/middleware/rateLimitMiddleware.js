@@ -1,4 +1,30 @@
 import rateLimit from "express-rate-limit";
+import logger from "../utils/logger.js";
+
+// Applied to every request as a blanket ceiling; the limiters below are the
+// per-route ones and are stricter where it matters.
+export const globalLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 50, // Limit each IP to 50 requests
+  message: {
+    status: 429,
+    error: "Too many requests",
+    message: "You have exceeded the rate limit. Try again later.",
+  },
+  handler: (req, res) => {
+    logger.warn("Rate limit exceeded", {
+      ip: req.ip,
+      userAgent: req.get("User-Agent"),
+      path: req.path,
+      service: "RateLimit",
+    });
+    res.status(429).json({
+      status: 429,
+      error: "Too many requests",
+      message: "You have exceeded the rate limit. Try again later.",
+    });
+  },
+});
 
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes

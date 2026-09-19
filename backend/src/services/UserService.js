@@ -10,7 +10,8 @@ export class UserService {
   }
 
   async getUserById(id) {
-    return this.userDBService.getUserById(id);
+    // The profile endpoint shows a user's workflows, so it asks for them.
+    return this.userDBService.getUserById(id, { withWorkflows: true });
   }
 
   async updateUser(id, data) {

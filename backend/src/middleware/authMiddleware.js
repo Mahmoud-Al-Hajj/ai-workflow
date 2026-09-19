@@ -1,9 +1,7 @@
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
-import prisma from "../lib/prisma.js";
+import { AuthService } from "../services/auth/authService.js";
 import logger from "../utils/logger.js";
 
-dotenv.config();
+const authService = new AuthService();
 
 export async function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -11,10 +9,7 @@ export async function authMiddleware(req, res, next) {
 
   const token = authHeader.split(" ")[1];
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-    });
+    const user = await authService.authenticate(token);
     if (!user) return res.status(401).json({ error: "Invalid token" });
     logger.debug("User authenticated successfully", {
       userId: user.id,

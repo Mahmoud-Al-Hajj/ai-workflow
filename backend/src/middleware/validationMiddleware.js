@@ -1,6 +1,5 @@
 import { body, param, validationResult } from "express-validator";
-import { UserDBService } from "../services/database/userDBService.js";
-const userDBService = new UserDBService();
+
 export const validateCreateWorkflow = [
   body("description")
     .isString()
@@ -28,15 +27,8 @@ export const validateIdParam = [
 
 export const validateRegister = [
   body("name").isString().notEmpty().withMessage("name is required"),
-  body("email")
-    .isEmail()
-    .notEmpty()
-    .custom(async (value) => {
-      const existingUser = await userDBService.getUserByEmail(value);
-      if (existingUser) {
-        throw new Error("A user already exists with this e-mail address");
-      }
-    }),
+  // Format only. Uniqueness is a domain invariant and lives in AuthService.
+  body("email").isEmail().notEmpty(),
   body("password")
     .isString()
     .withMessage("password must be a string")

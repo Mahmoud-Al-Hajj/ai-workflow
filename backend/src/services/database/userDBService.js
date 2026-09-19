@@ -27,7 +27,10 @@ export class UserDBService {
     });
   }
 
-  async getUserById(id) {
+  // Workflows are opt-in: authentication looks a user up on every request and
+  // has no use for them, so loading them by default would fetch a user's whole
+  // workflow list on each call.
+  async getUserById(id, { withWorkflows = false } = {}) {
     const numId = parseInt(id, 10);
     if (isNaN(numId) || numId <= 0) {
       throw new Error("Invalid user ID");
@@ -35,7 +38,7 @@ export class UserDBService {
     return prisma.user.findUnique({
       where: { id: numId },
       include: {
-        workflows: true,
+        workflows: withWorkflows,
       },
     });
   }

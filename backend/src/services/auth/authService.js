@@ -1,11 +1,24 @@
-import prisma from "../../lib/prisma.js";
 import bcrypt from "bcrypt";
-import { generateToken } from "../../utils/jwt.js";
+import { UserDBService } from "../database/userDBService.js";
+import { generateToken, verifyToken } from "../../utils/jwt.js";
 import { encrypt } from "../../utils/crypto.js";
 
 class AuthService {
+  constructor() {
+    this.userDBService = new UserDBService();
+  }
+
+  /**
+   * Resolve a bearer token to the User it identifies, or null if there is no
+   * such user. Throws if the token itself is invalid or expired.
+   */
+  async authenticate(token) {
+    const { userId } = verifyToken(token);
+    return this.userDBService.getUserById(userId);
+  }
+
   async login(email, password) {
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await this.userDBService.getUserByEmail(email);
     if (!user) throw new Error("Invalid credentials");
 
     const valid = await bcrypt.compare(password, user.password);
@@ -21,6 +34,13 @@ class AuthService {
       throw new Error("n8n URL and API key are required");
     }
 
+    // A unique email is a domain invariant, so it is enforced here rather than
+    // in HTTP validation, where it would only hold for one route.
+    const existing = await this.userDBService.getUserByEmail(email);
+    if (existing) {
+      throw new Error("A user already exists with this e-mail address");
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     let encryptedKey = null;
@@ -28,14 +48,12 @@ class AuthService {
       encryptedKey = encrypt(n8nApiKey);
     }
 
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        n8nUrl,
-        n8nApiKey: encryptedKey,
-      },
+    const user = await this.userDBService.createUser({
+      name,
+      email,
+      password: hashedPassword,
+      n8nUrl,
+      n8nApiKey: encryptedKey,
     });
 
     const token = generateToken(user.id);

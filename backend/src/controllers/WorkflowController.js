@@ -1,5 +1,8 @@
 import { workflowService } from "../services/workflowService.js";
-import { decrypt } from "../utils/crypto.js";
+import {
+  resolveN8nCredentials,
+  N8nCredentialsError,
+} from "../services/auth/n8nCredentials.js";
 
 export class WorkflowController {
   constructor() {
@@ -13,35 +16,26 @@ export class WorkflowController {
 
     const { description } = req.body;
     const userId = req.user?.id;
-    const n8nUrl = req.user?.n8nUrl;
-    const n8nApiKey = req.user?.n8nApiKey;
 
-    // Validate n8n configuration before proceeding
-    if (!n8nUrl || !n8nApiKey) {
-      return res.status(400).json({
-        success: false,
-        error:
-          "n8n credentials not configured. Please update your profile with valid n8n credentials.",
-      });
-    }
-
-    let decryptedN8nKey = null;
+    let credentials;
     try {
-      decryptedN8nKey = decrypt(n8nApiKey);
+      credentials = resolveN8nCredentials(req.user);
     } catch (error) {
-      return res.status(500).json({
-        success: false,
-        error:
-          "Failed to decrypt n8n credentials. Please reconfigure your profile.",
-      });
+      if (error instanceof N8nCredentialsError) {
+        return res.status(error.reason === "missing" ? 400 : 500).json({
+          success: false,
+          error: error.message,
+        });
+      }
+      throw error;
     }
 
     try {
       const result = await this.workflowService.createCompleteWorkflow({
         description,
         userId,
-        n8nUrl,
-        n8nApiKey: decryptedN8nKey,
+        n8nUrl: credentials.n8nUrl,
+        n8nApiKey: credentials.n8nApiKey,
       });
       res.status(201).json({
         success: true,
